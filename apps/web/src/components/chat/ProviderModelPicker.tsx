@@ -148,6 +148,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
     ? `${getDisplayModelName(selectedModel)}${selectedModel.isUnavailable ? " (Unavailable)" : ""}`
     : triggerTitle;
   const localPicker =
+    !props.onToggleModel &&
     !!props.currentSelection && !!props.onPresetSelect && usesLocalPicker(props.instanceEntries);
   const showInstanceBadge =
     !localPicker &&
