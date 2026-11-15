@@ -51,7 +51,7 @@ it("keeps legacy options visible, skips unsupported Fast with keyboard, and capt
   }
   await using screen = await render(<Picker />);
   await expect
-    .element(screen.getByText("Current selection: historical-model · medium · Fast"))
+    .element(screen.getByText("Current selection: historical-model · medium · Fast requested"))
     .toBeVisible();
   await expect
     .element(screen.getByRole("button", { name: /claude-fable-5-2 · high · Fast/ }))
@@ -78,7 +78,7 @@ it("keeps legacy options visible, skips unsupported Fast with keyboard, and capt
     ],
   });
   await expect
-    .element(screen.getByText("Current selection: gpt-6.1-sol · high · Fast"))
+    .element(screen.getByText("Current selection: gpt-6.1-sol · high · Fast requested"))
     .toBeVisible();
 });
 

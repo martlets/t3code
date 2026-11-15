@@ -17,7 +17,7 @@ export function LocalPresetPicker(props: {
     <div
       data-model-picker-content
       ref={list}
-      className="max-h-86.5 w-96 overflow-auto p-2"
+      className="max-h-86.5 w-96 max-w-[calc(100vw-2rem)] overflow-auto p-2"
       onKeyDown={(event) => {
         if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) return;
         const buttons = Array.from(
@@ -40,9 +40,16 @@ export function LocalPresetPicker(props: {
       <div className="p-2 text-sm">
         <div>Current selection: {localSelectionLabel(props.current)}</div>
         <div className="text-xs text-muted-foreground">
-          Provider identity: {props.current.instanceId}
+          Profile:{" "}
+          {props.current.instanceId === "codexHigh"
+            ? "Codex (legacy defaults)"
+            : props.current.instanceId}
         </div>
       </div>
+      <p className="px-2 pb-2 text-xs text-muted-foreground">
+        Thread choices override profile defaults. Fast and Standard request a service tier; delivery
+        can vary.
+      </p>
       {rows.map((row, index) => {
         const reason = row.reason ?? props.getDisabledReason?.(row.selection);
         return (

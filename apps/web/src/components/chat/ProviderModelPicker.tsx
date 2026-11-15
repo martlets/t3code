@@ -407,6 +407,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
             // Narrow compacted composers hide the provider icon before truncating the name.
             <span data-chat-provider-model-picker-icon className="contents">
               <ProviderInstanceIcon
+                instanceId={activeEntry.instanceId}
                 driverKind={activeEntry.driverKind}
                 displayName={activeEntry.displayName}
                 accentColor={activeEntry.accentColor}

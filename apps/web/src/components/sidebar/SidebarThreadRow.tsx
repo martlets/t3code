@@ -1,3 +1,4 @@
+import { localSelectionLabel } from "../chat/localPickerPresets";
 import { ThreadHoverCard, ThreadHoverCardPopup } from "../ThreadHoverCard";
 import { ThreadTerminalStatusButton } from "../ThreadStatusIndicators";
 import { discardComposerDraft } from "../../lib/discardComposerDraft";
@@ -192,6 +193,7 @@ function SidebarProviderStack(props: {
   );
   const current = (
     <ProviderInstanceIcon
+      instanceId={currentInstanceId}
       driverKind={currentEntry.driverKind}
       displayName={currentEntry.displayName}
       accentColor={currentEntry.accentColor}
@@ -202,9 +204,15 @@ function SidebarProviderStack(props: {
       iconClassName="opacity-60"
     />
   );
-  if (stack.length === 1) {
-    return <span className="inline-flex shrink-0 items-center">{current}</span>;
-  }
+  const labeledCurrent = (
+    <span className="inline-flex min-w-0 max-w-28 items-center gap-1">
+      {current}
+      {currentEntry.driverKind === "codex" ? (
+        <span className="truncate text-3xs text-muted-foreground">{currentEntry.displayName}</span>
+      ) : null}
+    </span>
+  );
+  if (stack.length === 1) return labeledCurrent;
   return (
     <span className="inline-flex shrink-0 items-center gap-1.5">
       {stack.slice(0, -1).map((instanceId) => {
@@ -221,7 +229,7 @@ function SidebarProviderStack(props: {
           />
         );
       })}
-      <span className="relative z-10 inline-flex items-center">{current}</span>
+      <span className="relative z-10 inline-flex min-w-0 items-center">{labeledCurrent}</span>
     </span>
   );
 }
@@ -319,10 +327,11 @@ function SidebarThreadTooltip({
               badgeClassName="h-2 min-w-2 px-0"
               iconClassName="size-3 shrink-0 grayscale opacity-60"
             />
-            <div className="min-w-0 truncate text-foreground/75">
+            <div className="min-w-0 wrap-break-word text-foreground/75">
+              Selected:{" "}
               {showInstanceBadge && providerEntry
-                ? `${modelLabel} · ${providerEntry.displayName}`
-                : modelLabel}
+                ? `${localSelectionLabel(thread.modelSelection, modelLabel)} · ${providerEntry.displayName}`
+                : localSelectionLabel(thread.modelSelection, modelLabel)}
             </div>
           </div>
         ) : null}

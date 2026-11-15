@@ -564,3 +564,38 @@ describe("provider icon metadata", () => {
     expect(restoredEntry?.enabled).toBe(true);
   });
 });
+
+// Historical launch defaults must never replace a thread's explicit options or identity.
+it("labels only the known legacy Codex profile while preserving snapshots and custom accounts", () => {
+  const snapshots = [
+    provider({ provider: ProviderDriverKind.make("codex"), instanceId: "codex" }),
+    provider({
+      provider: ProviderDriverKind.make("codex"),
+      instanceId: "codexHigh",
+      displayName: "Codex High",
+    }),
+    provider({
+      provider: ProviderDriverKind.make("codex"),
+      instanceId: "work",
+      displayName: "Work Codex",
+    }),
+  ];
+  const before = structuredClone(snapshots);
+  const entries = deriveProviderInstanceEntries(snapshots);
+  expect(entries.map((e) => [e.instanceId, e.displayName])).toEqual([
+    ["codex", "Codex"],
+    ["codexHigh", "Codex (legacy defaults)"],
+    ["work", "Work Codex"],
+  ]);
+  expect(entries[1]?.snapshot).toBe(snapshots[1]);
+  expect(snapshots).toEqual(before);
+  expect(
+    deriveProviderInstanceEntries([
+      provider({
+        provider: ProviderDriverKind.make("codex"),
+        instanceId: "codexHigh",
+        displayName: "My separate account",
+      }),
+    ])[0]?.displayName,
+  ).toBe("My separate account");
+});

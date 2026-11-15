@@ -67,7 +67,7 @@ it("retains other accounts and rejects missing catalog support without substitut
   ).toBe(true);
   const missing = entries.map((e) => ({ ...e, models: [] }));
   expect(localPickerRows(missing, current).every((r) => r.reason)).toBe(true);
-  expect(localSelectionLabel(current)).toBe("gpt-6.1-sol · high · Standard");
+  expect(localSelectionLabel(current)).toBe("gpt-6.1-sol · high · Standard requested");
   expect(localSelectionLabel({ ...current, model: "historical-model" })).toContain(
     "historical-model",
   );
@@ -89,4 +89,20 @@ it("leaves all seven captured schedule selections and enablement intact, includi
   expect(schedules.some((s) => s.modelSelection.options?.some((o) => o.value === "max"))).toBe(
     true,
   );
+});
+
+it("does not infer thinking or delivered speed from a legacy profile name", () => {
+  const legacy = { instanceId: ProviderInstanceId.make("codexHigh"), model: "claude-fable-5-2" };
+  expect(localSelectionLabel(legacy)).toBe(
+    "claude-fable-5-2 · Thinking inherited / unspecified · Speed inherited / unspecified",
+  );
+  expect(
+    localSelectionLabel({
+      ...legacy,
+      options: [
+        { id: "reasoningEffort", value: "medium" },
+        { id: "serviceTier", value: "priority" },
+      ],
+    }),
+  ).toBe("claude-fable-5-2 · medium · Fast requested");
 });
