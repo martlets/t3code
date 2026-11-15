@@ -9,6 +9,7 @@ import {
   type ResolvedKeybindingsConfig,
 } from "@t3tools/contracts";
 import { createContext, memo, type ReactNode, useRef, useState } from "react";
+import { Button } from "../ui/button";
 import { Badge } from "../ui/badge";
 import { Popover, PopoverPopup, PopoverTrigger } from "../ui/popover";
 import { Tooltip, TooltipPopup, TooltipTrigger } from "../ui/tooltip";
@@ -118,6 +119,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
 }) {
   const composerFloatingLayerProps = useComposerMenuProps();
   const [uncontrolledIsMenuOpen, setUncontrolledIsMenuOpen] = useState(false);
+  const [showFullCatalog, setShowFullCatalog] = useState(false);
   const isMenuOpen = props.open ?? uncontrolledIsMenuOpen;
   const searchInputRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
@@ -148,7 +150,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
     ? `${getDisplayModelName(selectedModel)}${selectedModel.isUnavailable ? " (Unavailable)" : ""}`
     : triggerTitle;
   const localPicker =
-    !props.onToggleModel &&
+    props.selectedModels === undefined &&
     !!props.currentSelection &&
     !!props.onPresetSelect &&
     usesLocalPicker(props.instanceEntries);
@@ -249,8 +251,8 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
     "data-chat-provider-model-picker-label": "true",
   } as const;
 
-  const picker =
-    localPicker && props.currentSelection ? (
+  const pickerContent =
+    localPicker && !showFullCatalog && props.currentSelection ? (
       <LocalPresetPicker
         entries={props.instanceEntries}
         current={props.currentSelection}
@@ -303,6 +305,21 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
         {...(docked ? { docked, onFocusEffort: () => void focusEffort("any") } : {})}
       />
     );
+
+  const picker = localPicker ? (
+    <div className="flex min-h-0 flex-col">
+      <Button variant="ghost" size="sm" onClick={() => setShowFullCatalog(!showFullCatalog)}>
+        {showFullCatalog
+          ? "Back to presets"
+          : props.onToggleModel
+            ? "All models / select multiple"
+            : "All models"}
+      </Button>
+      {pickerContent}
+    </div>
+  ) : (
+    pickerContent
+  );
 
   return (
     <Popover
