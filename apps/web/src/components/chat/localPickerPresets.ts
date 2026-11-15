@@ -8,20 +8,18 @@ export function usesLocalPicker(entries: ReadonlyArray<ProviderInstanceEntry>) {
   );
 }
 
-export function localSelectionLabel(selection: ModelSelection) {
+export function localSelectionLabel(selection: ModelSelection, modelName = selection.model) {
   const options = selection.options ?? [];
   const effort = options.find((o) => o.id === "reasoningEffort" || o.id === "effort")?.value;
   const tier = options.find((o) => o.id === "serviceTier" || o.id === "fastMode");
   const speed = tier
     ? tier.value === "priority" || tier.value === true
-      ? "Fast"
+      ? "Fast requested"
       : tier.value === "default" || tier.value === false
-        ? "Standard"
+        ? "Standard requested"
         : String(tier.value)
-    : selection.model === "claude-fable-5-2"
-      ? "Standard"
-      : "Speed unspecified";
-  return `${selection.model} · ${effort ?? "Reasoning unspecified"} · ${speed}`;
+    : "Speed inherited / unspecified";
+  return `${modelName} · ${effort ?? "Thinking inherited / unspecified"} · ${speed}`;
 }
 
 export function localPickerRows(
