@@ -70,7 +70,7 @@ export function localPickerRows(
       continue;
     for (const model of entry.models)
       rows.push({
-        group: entry.displayName,
+        group: `${entry.displayName} (${entry.instanceId})`,
         label: model.name,
         selection: { instanceId: entry.instanceId, model: model.slug },
         reason:

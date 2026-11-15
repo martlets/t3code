@@ -60,7 +60,11 @@ it("retains other accounts and rejects missing catalog support without substitut
   const other = { ...entries[0]!, instanceId: "codex_work" } as ProviderInstanceEntry;
   expect(usesLocalPicker([entries[0]!, other])).toBe(false);
   const rows = localPickerRows([...entries, other], current);
-  expect(rows.some((r) => r.selection.instanceId === other.instanceId)).toBe(true);
+  expect(
+    rows.some(
+      (r) => r.selection.instanceId === other.instanceId && r.group.includes(other.instanceId),
+    ),
+  ).toBe(true);
   const missing = entries.map((e) => ({ ...e, models: [] }));
   expect(localPickerRows(missing, current).every((r) => r.reason)).toBe(true);
   expect(localSelectionLabel(current)).toBe("gpt-6.1-sol · high · Standard");
