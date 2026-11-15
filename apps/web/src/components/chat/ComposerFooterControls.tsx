@@ -351,7 +351,7 @@ export function ComposerModelPicker({
   readonly onProviderModelSelect: (
     instanceId: ProviderInstanceId,
     model: string,
-    options?: { focusComposer?: boolean },
+    options?: { focusComposer?: boolean; selection?: ModelSelection },
   ) => void;
 }) {
   const { instanceEntries, modelOptionsByInstance } = pickerProps;
@@ -384,6 +384,15 @@ export function ComposerModelPicker({
   return (
     <ProviderModelPicker
       {...pickerProps}
+      currentSelection={selectedModelSelection}
+      onPresetSelect={(selection) => {
+        onMultipleModelSelectionsChange(null);
+        onProviderModelSelect(
+          selection.instanceId,
+          selection.model,
+          selection.options ? { selection } : undefined,
+        );
+      }}
       {...(multipleModelsEnabled
         ? {
             ...(multipleModelSelections !== null
