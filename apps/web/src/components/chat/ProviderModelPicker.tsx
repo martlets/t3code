@@ -149,7 +149,9 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
     : triggerTitle;
   const localPicker =
     !props.onToggleModel &&
-    !!props.currentSelection && !!props.onPresetSelect && usesLocalPicker(props.instanceEntries);
+    !!props.currentSelection &&
+    !!props.onPresetSelect &&
+    usesLocalPicker(props.instanceEntries);
   const showInstanceBadge =
     !localPicker &&
     activeEntry !== null &&
