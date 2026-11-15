@@ -11,6 +11,16 @@ import catalog from "./fixtures/localPickerCatalog.json";
 it("keeps legacy options visible, skips unsupported Fast with keyboard, and captures exact selection", async () => {
   const entries = catalog.map((p) => ({
     ...p,
+    snapshot: {
+      ...p,
+      auth: { status: "authenticated" },
+      status: "ready",
+      driver: p.instanceId === "claudeAgent" ? "claudeAgent" : "codex",
+      installed: true,
+      version: null,
+      slashCommands: [],
+      skills: [],
+    },
     driverKind: p.instanceId === "claudeAgent" ? "claudeAgent" : "codex",
     status: "ready",
     isAvailable: true,
@@ -72,51 +82,68 @@ it("keeps legacy options visible, skips unsupported Fast with keyboard, and capt
     .toBeVisible();
 });
 
-it("dispatches canonical Codex with explicit preset options through the composer picker for a new thread", async () => {
-  const entries = catalog.map((p) => ({
-    ...p,
-    driverKind: p.instanceId === "claudeAgent" ? "claudeAgent" : "codex",
-    status: "ready",
-    isAvailable: true,
-    installed: true,
-    isDefault: false,
-    models: p.models.map((m) => ({ ...m, name: m.slug, isCustom: false })),
-  })) as unknown as ProviderInstanceEntry[];
-  const dispatch = vi.fn();
-  const current: ModelSelection = {
-    instanceId: ProviderInstanceId.make("codexHigh"),
-    model: "gpt-6.1-sol",
-    options: [
-      { id: "reasoningEffort", value: "high" },
-      { id: "serviceTier", value: "priority" },
-    ],
-  };
-  await using _screen = await render(
-    <ComposerModelPicker
-      environmentId={null}
-      activeInstanceId={current.instanceId}
-      model={current.model}
-      lockedProvider={null}
-      instanceEntries={entries}
-      modelOptionsByInstance={new Map(entries.map((e) => [e.instanceId, e.models]))}
-      multipleModelsEnabled={false}
-      multipleModelSelections={null}
-      onMultipleModelSelectionsChange={() => {}}
-      selectedModelSelection={current}
-      onProviderModelSelect={dispatch}
-      preserveLocalIdentity={false}
-      open
-    />,
-  );
-  await page.getByRole("button", { name: "gpt-6.1-sol · high · Standard", exact: true }).click();
-  expect(dispatch).toHaveBeenCalledWith(ProviderInstanceId.make("codex"), "gpt-6.1-sol", {
-    selection: {
-      instanceId: ProviderInstanceId.make("codex"),
+it.each([false, true])(
+  "dispatches canonical Codex presets with multi-model setting %s",
+  async (multipleModelsEnabled) => {
+    const entries = catalog.map((p) => ({
+      ...p,
+      snapshot: {
+        ...p,
+        auth: { status: "authenticated" },
+        status: "ready",
+        driver: p.instanceId === "claudeAgent" ? "claudeAgent" : "codex",
+        installed: true,
+        version: null,
+        slashCommands: [],
+        skills: [],
+      },
+      driverKind: p.instanceId === "claudeAgent" ? "claudeAgent" : "codex",
+      status: "ready",
+      isAvailable: true,
+      installed: true,
+      isDefault: false,
+      models: p.models.map((m) => ({ ...m, name: m.slug, isCustom: false })),
+    })) as unknown as ProviderInstanceEntry[];
+    const dispatch = vi.fn();
+    const current: ModelSelection = {
+      instanceId: ProviderInstanceId.make("codexHigh"),
       model: "gpt-6.1-sol",
       options: [
         { id: "reasoningEffort", value: "high" },
-        { id: "serviceTier", value: "default" },
+        { id: "serviceTier", value: "priority" },
       ],
-    },
-  });
-});
+    };
+    await using _screen = await render(
+      <ComposerModelPicker
+        environmentId={null}
+        activeInstanceId={current.instanceId}
+        model={current.model}
+        lockedProvider={null}
+        instanceEntries={entries}
+        modelOptionsByInstance={new Map(entries.map((e) => [e.instanceId, e.models]))}
+        multipleModelsEnabled={multipleModelsEnabled}
+        multipleModelSelections={null}
+        onMultipleModelSelectionsChange={() => {}}
+        selectedModelSelection={current}
+        onProviderModelSelect={dispatch}
+        preserveLocalIdentity={false}
+        open
+      />,
+    );
+    if (multipleModelsEnabled) {
+      await page.getByRole("button", { name: "All models / select multiple", exact: true }).click();
+      await page.getByRole("button", { name: "Back to presets", exact: true }).click();
+    }
+    await page.getByRole("button", { name: "gpt-6.1-sol · high · Standard", exact: true }).click();
+    expect(dispatch).toHaveBeenCalledWith(ProviderInstanceId.make("codex"), "gpt-6.1-sol", {
+      selection: {
+        instanceId: ProviderInstanceId.make("codex"),
+        model: "gpt-6.1-sol",
+        options: [
+          { id: "reasoningEffort", value: "high" },
+          { id: "serviceTier", value: "default" },
+        ],
+      },
+    });
+  },
+);
