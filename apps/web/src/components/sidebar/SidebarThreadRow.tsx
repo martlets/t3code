@@ -328,7 +328,7 @@ function SidebarThreadTooltip({
               iconClassName="size-3 shrink-0 grayscale opacity-60"
             />
             <div className="min-w-0 wrap-break-word text-foreground/75">
-              Selected:{" "}
+              Saved thread:{" "}
               {showInstanceBadge && providerEntry
                 ? `${localSelectionLabel(thread.modelSelection, modelLabel)} · ${providerEntry.displayName}`
                 : localSelectionLabel(thread.modelSelection, modelLabel)}
