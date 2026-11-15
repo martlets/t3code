@@ -1,0 +1,121 @@
+[
+  {
+    "enabled": false,
+    "modelSelection": {
+      "instanceId": "codex",
+      "model": "gpt-6.1-sol",
+      "options": [
+        {
+          "id": "reasoningEffort",
+          "value": "max"
+        },
+        {
+          "id": "serviceTier",
+          "value": "priority"
+        }
+      ]
+    }
+  },
+  {
+    "enabled": false,
+    "modelSelection": {
+      "instanceId": "codex",
+      "model": "gpt-6.1-sol",
+      "options": [
+        {
+          "id": "reasoningEffort",
+          "value": "high"
+        },
+        {
+          "id": "serviceTier",
+          "value": "default"
+        }
+      ]
+    }
+  },
+  {
+    "enabled": false,
+    "modelSelection": {
+      "instanceId": "codex",
+      "model": "gpt-6.1-sol",
+      "options": [
+        {
+          "id": "reasoningEffort",
+          "value": "high"
+        },
+        {
+          "id": "serviceTier",
+          "value": "default"
+        }
+      ]
+    }
+  },
+  {
+    "enabled": false,
+    "modelSelection": {
+      "instanceId": "claudeAgent",
+      "model": "claude-opus-5-5",
+      "options": [
+        {
+          "id": "effort",
+          "value": "medium"
+        },
+        {
+          "id": "fastMode",
+          "value": false
+        }
+      ]
+    }
+  },
+  {
+    "enabled": false,
+    "modelSelection": {
+      "instanceId": "claudeAgent",
+      "model": "claude-opus-5-5",
+      "options": [
+        {
+          "id": "effort",
+          "value": "medium"
+        },
+        {
+          "id": "fastMode",
+          "value": false
+        }
+      ]
+    }
+  },
+  {
+    "enabled": false,
+    "modelSelection": {
+      "instanceId": "claudeAgent",
+      "model": "claude-opus-5-5",
+      "options": [
+        {
+          "id": "effort",
+          "value": "medium"
+        },
+        {
+          "id": "fastMode",
+          "value": false
+        }
+      ]
+    }
+  },
+  {
+    "enabled": true,
+    "modelSelection": {
+      "instanceId": "codex",
+      "model": "gpt-6.1-sol",
+      "options": [
+        {
+          "id": "reasoningEffort",
+          "value": "high"
+        },
+        {
+          "id": "serviceTier",
+          "value": "default"
+        }
+      ]
+    }
+  }
+]

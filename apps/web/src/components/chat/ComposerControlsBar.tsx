@@ -198,6 +198,7 @@ export function ComposerControlsBar(props: {
       multipleModelSelections={multipleModelSelections}
       onMultipleModelSelectionsChange={onMultipleModelSelectionsChange}
       selectedModelSelection={selectedModelSelection}
+      preserveLocalIdentity={routeKind === "server"}
       onProviderModelSelect={onProviderModelSelect}
       activeInstanceId={
         providerCatalogPending

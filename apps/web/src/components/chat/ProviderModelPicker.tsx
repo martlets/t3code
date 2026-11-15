@@ -1,3 +1,6 @@
+import { LocalPresetPicker } from "./LocalPresetPicker";
+import { localSelectionLabel, usesLocalPicker } from "./localPickerPresets";
+import type { ModelSelection } from "@t3tools/contracts";
 import {
   ANTIGRAVITY_DEFAULT_MODEL,
   type ProviderInstanceId,
@@ -72,6 +75,9 @@ function lockBackgroundScroll(popup: HTMLElement | null) {
 export const DockedPickerContext = createContext<{ modelLabel: string }>({ modelLabel: "" });
 
 export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
+  currentSelection?: ModelSelection;
+  preserveLocalIdentity?: boolean;
+  onPresetSelect?: (selection: ModelSelection) => void;
   environmentId: EnvironmentId | null;
   activeInstanceId: ProviderInstanceId;
   model: string;
@@ -141,8 +147,15 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
   const triggerLabel = selectedModel
     ? `${getDisplayModelName(selectedModel)}${selectedModel.isUnavailable ? " (Unavailable)" : ""}`
     : triggerTitle;
+  const localPicker =
+    !props.onToggleModel &&
+    !!props.currentSelection &&
+    !!props.onPresetSelect &&
+    usesLocalPicker(props.instanceEntries);
   const showInstanceBadge =
-    activeEntry !== null && shouldShowInstanceBadge(activeEntry, props.instanceEntries);
+    !localPicker &&
+    activeEntry !== null &&
+    shouldShowInstanceBadge(activeEntry, props.instanceEntries);
 
   const setIsMenuOpen = (open: boolean) => {
     props.onOpenChange?.(open);
@@ -227,43 +240,69 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
     .filter(Boolean)
     .join(" · ");
 
-  const triggerText = props.triggerLabel ?? multipleLabel ?? triggerTitle;
+  const triggerText =
+    localPicker && props.currentSelection
+      ? localSelectionLabel(props.currentSelection)
+      : (props.triggerLabel ?? multipleLabel ?? triggerTitle);
   const triggerTextProps = {
     className: "min-w-0 flex-1 overflow-hidden truncate",
     "data-chat-provider-model-picker-label": "true",
   } as const;
 
-  const picker = (
-    <ModelPickerContent
-      searchInputRef={searchInputRef}
-      environmentId={props.environmentId}
-      activeInstanceId={activeInstanceId}
-      model={props.model}
-      {...(props.selectedModels !== undefined ? { selectedModels: props.selectedModels } : {})}
-      {...(props.onToggleModel
-        ? {
-            onToggleModel: (instanceId: ProviderInstanceId, model: string) => {
-              if (!props.disabled) props.onToggleModel?.(instanceId, model);
-            },
-          }
-        : {})}
-      lockedProvider={props.lockedProvider}
-      lockedContinuationGroupKey={props.lockedContinuationGroupKey ?? null}
-      instanceEntries={props.instanceEntries}
-      {...(props.keybindings ? { keybindings: props.keybindings } : {})}
-      modelOptionsByInstance={props.modelOptionsByInstance}
-      terminalOpen={props.terminalOpen ?? false}
-      onRequestClose={() => setIsMenuOpen(false)}
-      {...(props.onOpenProviderSetup ? { onOpenProviderSetup: props.onOpenProviderSetup } : {})}
-      getModelDisabledReason={(instanceId, model) =>
-        props.disabled
-          ? "Model picker is disabled"
-          : (props.getModelDisabledReason?.(instanceId, model) ?? null)
-      }
-      onInstanceModelChange={handleInstanceModelChange}
-      {...(docked ? { docked, onFocusEffort: () => void focusEffort("any") } : {})}
-    />
-  );
+  const picker =
+    localPicker && props.currentSelection ? (
+      <LocalPresetPicker
+        entries={props.instanceEntries}
+        current={props.currentSelection}
+        preserveLegacy={props.preserveLocalIdentity}
+        disabled={props.disabled}
+        getDisabledReason={(selection) => {
+          const entry = props.instanceEntries.find((e) => e.instanceId === selection.instanceId);
+          if (props.lockedProvider && entry?.driverKind !== props.lockedProvider)
+            return "Provider locked for this thread";
+          if (
+            props.lockedContinuationGroupKey &&
+            entry?.continuationGroupKey !== props.lockedContinuationGroupKey
+          )
+            return "Continuation unavailable";
+          return props.getModelDisabledReason?.(selection.instanceId, selection.model) ?? null;
+        }}
+        onSelect={(selection) => {
+          props.onPresetSelect?.(selection);
+          setIsMenuOpen(false);
+        }}
+      />
+    ) : (
+      <ModelPickerContent
+        searchInputRef={searchInputRef}
+        environmentId={props.environmentId}
+        activeInstanceId={activeInstanceId}
+        model={props.model}
+        {...(props.selectedModels !== undefined ? { selectedModels: props.selectedModels } : {})}
+        {...(props.onToggleModel
+          ? {
+              onToggleModel: (instanceId: ProviderInstanceId, model: string) => {
+                if (!props.disabled) props.onToggleModel?.(instanceId, model);
+              },
+            }
+          : {})}
+        lockedProvider={props.lockedProvider}
+        lockedContinuationGroupKey={props.lockedContinuationGroupKey ?? null}
+        instanceEntries={props.instanceEntries}
+        {...(props.keybindings ? { keybindings: props.keybindings } : {})}
+        modelOptionsByInstance={props.modelOptionsByInstance}
+        terminalOpen={props.terminalOpen ?? false}
+        onRequestClose={() => setIsMenuOpen(false)}
+        {...(props.onOpenProviderSetup ? { onOpenProviderSetup: props.onOpenProviderSetup } : {})}
+        getModelDisabledReason={(instanceId, model) =>
+          props.disabled
+            ? "Model picker is disabled"
+            : (props.getModelDisabledReason?.(instanceId, model) ?? null)
+        }
+        onInstanceModelChange={handleInstanceModelChange}
+        {...(docked ? { docked, onFocusEffort: () => void focusEffort("any") } : {})}
+      />
+    );
 
   return (
     <Popover
@@ -285,7 +324,9 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
           <ComposerControl
             ref={triggerRef}
             aria-label={[
-              props.triggerAriaLabel ?? props.triggerLabel ?? allModelNames ?? triggerLabel,
+              localPicker && props.currentSelection
+                ? localSelectionLabel(props.currentSelection)
+                : (props.triggerAriaLabel ?? props.triggerLabel ?? allModelNames ?? triggerLabel),
               props.triggerDetail,
             ]
               .filter(Boolean)
@@ -373,7 +414,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
               <TooltipPopup side="top">{triggerTooltipContent}</TooltipPopup>
             </Tooltip>
           )}
-          {props.triggerSuffix}
+          {localPicker ? null : props.triggerSuffix}
           {selectedModel?.isUnavailable && !selectedEntries && props.triggerLabel === undefined ? (
             <Badge variant="outline" size="sm">
               Unavailable
