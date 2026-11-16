@@ -1,3 +1,4 @@
+import { localSelectionLabel } from "./localPickerPresets";
 import { formatProviderSkillDisplayName } from "@t3tools/shared/inlineSkills";
 import { useComposerTypingGuard } from "./useComposerTypingGuard";
 import { DESKTOP_PASTE_AS_TEXT_EVENT } from "../../lib/desktopPasteAsText";
@@ -5398,6 +5399,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
         />
       ) : null}
       <ProviderModelPicker
+        selectionLabel={localSelectionLabel(selectedModelSelection)}
         environmentId={environmentId}
         compact={false}
         isComposerOwned
