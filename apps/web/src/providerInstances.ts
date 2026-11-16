@@ -92,12 +92,19 @@ export function resolveProviderCatalogAvailability(input: {
   return input.entries.length === 0 ? "unconfigured" : "unavailable";
 }
 
-/**
- * Whether an instance can currently contribute models to an interactive picker.
- *
- * Disabling an instance updates `enabled` independently, while its previous
- * `ready` probe status can remain in the streamed snapshot until reconciliation.
- */
+/** Presentation only: keep the historical runtime identity and configured name intact. */
+export function providerProfileDisplayName(
+  snapshot: Pick<ServerProvider, "instanceId" | "driver" | "displayName">,
+): string {
+  const name = resolveProviderInstanceDisplayName(snapshot);
+  return snapshot.driver === "codex" &&
+    snapshot.instanceId === "codexHigh" &&
+    ["Codex High", "Codex (High)", "codexHigh"].includes(name)
+    ? "Codex (legacy defaults)"
+    : name;
+}
+
+/** Disabled instances may retain ready status until reconciliation. */
 export function isProviderInstancePickerReady(entry: ProviderInstanceEntry): boolean {
   return entry.enabled && entry.isAvailable && entry.status === "ready";
 }
@@ -125,7 +132,7 @@ export function deriveProviderInstanceEntries(
     return {
       instanceId,
       driverKind,
-      displayName: resolveProviderInstanceDisplayName(snapshot),
+      displayName: providerProfileDisplayName(snapshot),
       accentColor: normalizeProviderAccentColor(snapshot.accentColor),
       ...(driverKind === "acpRegistry" && snapshot.iconUrl
         ? { acpRegistryIconUrl: snapshot.iconUrl }

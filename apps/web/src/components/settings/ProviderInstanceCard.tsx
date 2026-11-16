@@ -1,5 +1,6 @@
 "use client";
 
+import { providerProfileDisplayName } from "../../providerInstances";
 import { Spinner } from "~/components/ui/spinner";
 
 import {
@@ -747,8 +748,15 @@ export function ProviderInstanceCard({
       ? onInstallRecommended
       : onRunUpdate;
   const urlAuthAction = liveProvider?.auth.action;
-  const displayName =
-    instance.displayName?.trim() || driverOption?.label || String(instance.driver);
+  const displayName = providerProfileDisplayName({
+    instanceId,
+    driver: instance.driver,
+    displayName: instance.displayName?.trim() || driverOption?.label || String(instance.driver),
+  });
+  const profileExplanation =
+    instance.driver === "codex" && ["codex", "codexHigh"].includes(instanceId)
+      ? `${instanceId === "codexHigh" ? "Legacy defaults profile" : "Default profile"} · ${instanceId}. Profiles use the same Codex sign-in when configured with the same credentials. Adding a profile adds no subscription allowance. Thread model and thinking choices can override launch defaults. Speed is a request; delivery can vary.`
+      : null;
   const accentColor = normalizeProviderAccentColor(instance.accentColor);
   const { copyToClipboard } = useCopyToClipboard<{ providerName: string }>({
     onCopy: ({ providerName }) => {
@@ -866,6 +874,7 @@ export function ProviderInstanceCard({
 
   const titleIconNode = (
     <ProviderInstanceIcon
+      instanceId={instanceId}
       driverKind={driverKind ?? instance.driver}
       displayName={displayName}
       accentColor={accentColor}
@@ -1074,6 +1083,13 @@ export function ProviderInstanceCard({
               ) : null}
               {versionAdvisoryNode}
             </span>
+            {profileExplanation ? (
+              <span className="block text-xs text-muted-foreground">
+                {instanceId === "codexHigh"
+                  ? "Legacy defaults · thread choices take precedence"
+                  : "Default profile"}
+              </span>
+            ) : null}
             <span className="mt-0.5 flex items-start gap-1.5 text-xs leading-normal text-muted-foreground/80">
               {/* The dot describes provider health, not the update in progress. */}
               {statusDotNode && !updateProgress ? (
@@ -1178,6 +1194,9 @@ export function ProviderInstanceCard({
   return (
     <>
       <SettingsSection title={displayName} icon={titleIconNode} headerAction={editorHeaderAction}>
+        {profileExplanation ? (
+          <p className="px-4 py-3 text-sm text-muted-foreground">{profileExplanation}</p>
+        ) : null}
         <SettingsRow
           title="Display name"
           status={

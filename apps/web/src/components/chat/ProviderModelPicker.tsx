@@ -54,6 +54,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
   triggerClassName?: string;
   /** Aggregate settings can show a neutral value without claiming one provider is selected. */
   triggerLabel?: string;
+  selectionLabel?: string;
   triggerAriaLabel?: string;
   onOpenChange?: (open: boolean) => void;
   onOpenProviderSetup?: (instanceId: ProviderInstanceId) => void;
@@ -189,9 +190,11 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
   const allModelNames = selectedEntries
     ? selectedEntries.map((selection) => selection.label).join(", ") || "Choose models"
     : undefined;
-  const triggerTooltipContent = shortcutLabel
-    ? `${props.triggerLabel ?? allModelNames ?? triggerLabel} · ${shortcutLabel}`
-    : (props.triggerLabel ?? allModelNames ?? triggerLabel);
+  const profileSelectionLabel = props.selectionLabel
+    ? `${activeEntry?.displayName ?? props.activeInstanceId} · ${props.selectionLabel}`
+    : undefined;
+  const tooltipLabel = props.triggerLabel ?? allModelNames ?? profileSelectionLabel ?? triggerLabel;
+  const triggerTooltipContent = shortcutLabel ? `${tooltipLabel} · ${shortcutLabel}` : tooltipLabel;
 
   return (
     <Popover
@@ -248,6 +251,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
             </span>
           ) : activeEntry && props.triggerLabel === undefined ? (
             <ProviderInstanceIcon
+              instanceId={activeEntry.instanceId}
               driverKind={activeEntry.driverKind}
               displayName={activeEntry.displayName}
               accentColor={activeEntry.accentColor}
@@ -272,7 +276,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
                 />
               }
             >
-              {props.triggerLabel ?? multipleLabel ?? triggerTitle}
+              {props.triggerLabel ?? multipleLabel ?? profileSelectionLabel ?? triggerTitle}
             </TooltipTrigger>
             <TooltipPopup side="top">{triggerTooltipContent}</TooltipPopup>
           </Tooltip>

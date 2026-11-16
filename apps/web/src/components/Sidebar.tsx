@@ -1,3 +1,4 @@
+import { localSelectionLabel } from "./chat/localPickerPresets";
 import { type EnvironmentId, type ScopedProjectRef } from "@t3tools/contracts";
 import { ThreadHoverCard, ThreadHoverCardPopup } from "./ThreadHoverCard";
 import { CollapsibleSectionHeader } from "./ui/collapsible-section-header";
@@ -400,6 +401,7 @@ function SidebarProviderStack(props: {
   );
   const current = (
     <ProviderInstanceIcon
+      instanceId={currentInstanceId}
       driverKind={currentEntry.driverKind}
       displayName={currentEntry.displayName}
       accentColor={currentEntry.accentColor}
@@ -411,9 +413,15 @@ function SidebarProviderStack(props: {
       badgeClassName="right-[-0.1875rem] bottom-[-0.1875rem] h-3 min-w-3 px-0.5 text-5xs"
     />
   );
-  if (stack.length === 1) {
-    return <span className="inline-flex shrink-0 items-center">{current}</span>;
-  }
+  const labeledCurrent = (
+    <span className="inline-flex min-w-0 max-w-28 items-center gap-1">
+      {current}
+      {currentEntry.driverKind === "codex" ? (
+        <span className="truncate text-3xs text-muted-foreground">{currentEntry.displayName}</span>
+      ) : null}
+    </span>
+  );
+  if (stack.length === 1) return labeledCurrent;
   return (
     <span className="inline-flex shrink-0 items-center gap-1.5">
       {stack.slice(0, -1).map((instanceId) => {
@@ -422,6 +430,7 @@ function SidebarProviderStack(props: {
         return (
           <ProviderInstanceIcon
             key={instanceId}
+            instanceId={instanceId}
             driverKind={entry.driverKind}
             displayName={entry.displayName}
             acpRegistryAgentId={entry.acpRegistryAgentId}
@@ -430,7 +439,7 @@ function SidebarProviderStack(props: {
           />
         );
       })}
-      <span className="relative z-10 inline-flex items-center">{current}</span>
+      <span className="relative z-10 inline-flex min-w-0 items-center">{labeledCurrent}</span>
     </span>
   );
 }
@@ -516,6 +525,7 @@ function SidebarThreadTooltip({
         {driverKind ? (
           <div className="flex min-w-0 items-center gap-2">
             <ProviderInstanceIcon
+              instanceId={modelInstanceId}
               driverKind={driverKind}
               displayName={
                 providerEntry?.displayName ?? thread.runtime?.providerName ?? modelInstanceId
@@ -531,8 +541,8 @@ function SidebarThreadTooltip({
             />
             <div className="min-w-0 truncate text-foreground/75">
               {showInstanceBadge && providerEntry
-                ? `${modelLabel} · ${providerEntry.displayName}`
-                : modelLabel}
+                ? `Saved thread: ${localSelectionLabel(thread.modelSelection, modelLabel)} · ${providerEntry.displayName}`
+                : `Saved thread: ${localSelectionLabel(thread.modelSelection, modelLabel)}`}
             </div>
           </div>
         ) : null}

@@ -56,6 +56,7 @@ export function resolveProviderInstanceAcpRegistryIconUrl(input: {
 
 export const ProviderInstanceIcon = memo(function ProviderInstanceIcon(props: {
   driverKind: ProviderDriverKind;
+  instanceId?: string | undefined;
   displayName: string;
   accentColor?: string | undefined;
   acpRegistryAgentId?: string | undefined;
@@ -74,7 +75,10 @@ export const ProviderInstanceIcon = memo(function ProviderInstanceIcon(props: {
   const accentStyle = props.accentColor
     ? ({ "--provider-accent": props.accentColor } as CSSProperties)
     : undefined;
-  const badgeContent = props.badgeContent ?? "initials";
+  const isLocalCodex =
+    props.driverKind === "codex" &&
+    (props.instanceId === "codex" || props.instanceId === "codexHigh");
+  const badgeContent = props.badgeContent ?? (isLocalCodex ? "none" : "initials");
   const isAcpRegistry = props.driverKind === "acpRegistry";
   const acpRegistryIconUrl = resolveProviderInstanceAcpRegistryIconUrl({
     driverKind: props.driverKind,
@@ -90,6 +94,7 @@ export const ProviderInstanceIcon = memo(function ProviderInstanceIcon(props: {
       )}
       style={accentStyle}
       data-provider-accent-color={props.accentColor}
+      aria-label={props.displayName}
     >
       {isAcpRegistry ? (
         <AcpRegistryAgentIcon
