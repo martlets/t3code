@@ -1717,7 +1717,7 @@ export interface ChatComposerProps {
   onProviderModelSelect: (
     instanceId: ProviderInstanceId,
     model: string,
-    options?: { focusComposer?: boolean },
+    options?: { focusComposer?: boolean; selection?: ModelSelection },
   ) => void;
   onOpenProviderSetup: (instanceId: ProviderInstanceId) => void;
   getModelDisabledReason: (instanceId: ProviderInstanceId, model: string) => string | null;
@@ -5399,6 +5399,16 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
         />
       ) : null}
       <ProviderModelPicker
+        currentSelection={selectedModelSelection}
+        preserveLocalIdentity={routeKind === "server"}
+        onPresetSelect={(selection) => {
+          setMultipleModelSelections(null);
+          onProviderModelSelect(
+            selection.instanceId,
+            selection.model,
+            selection.options ? { selection } : undefined,
+          );
+        }}
         selectionLabel={localSelectionLabel(selectedModelSelection)}
         environmentId={environmentId}
         compact={false}

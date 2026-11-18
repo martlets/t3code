@@ -1,0 +1,204 @@
+[
+  {
+    "provider": "codex",
+    "model": "gpt-6-astra",
+    "options": [
+      {
+        "id": "reasoningEffort",
+        "value": "high"
+      },
+      {
+        "id": "serviceTier",
+        "value": "default"
+      }
+    ],
+    "available": true
+  },
+  {
+    "provider": "codex",
+    "model": "gpt-6-astra",
+    "options": [
+      {
+        "id": "reasoningEffort",
+        "value": "high"
+      },
+      {
+        "id": "serviceTier",
+        "value": "priority"
+      }
+    ],
+    "available": true
+  },
+  {
+    "provider": "codex",
+    "model": "gpt-6-astra",
+    "options": [
+      {
+        "id": "reasoningEffort",
+        "value": "medium"
+      },
+      {
+        "id": "serviceTier",
+        "value": "default"
+      }
+    ],
+    "available": true
+  },
+  {
+    "provider": "codex",
+    "model": "gpt-6-astra",
+    "options": [
+      {
+        "id": "reasoningEffort",
+        "value": "medium"
+      },
+      {
+        "id": "serviceTier",
+        "value": "priority"
+      }
+    ],
+    "available": true
+  },
+  {
+    "provider": "codex",
+    "model": "gpt-6.1-sol",
+    "options": [
+      {
+        "id": "reasoningEffort",
+        "value": "high"
+      },
+      {
+        "id": "serviceTier",
+        "value": "default"
+      }
+    ],
+    "available": true
+  },
+  {
+    "provider": "codex",
+    "model": "gpt-6.1-sol",
+    "options": [
+      {
+        "id": "reasoningEffort",
+        "value": "high"
+      },
+      {
+        "id": "serviceTier",
+        "value": "priority"
+      }
+    ],
+    "available": true
+  },
+  {
+    "provider": "codex",
+    "model": "gpt-6.1-terra",
+    "options": [
+      {
+        "id": "reasoningEffort",
+        "value": "high"
+      },
+      {
+        "id": "serviceTier",
+        "value": "default"
+      }
+    ],
+    "available": true
+  },
+  {
+    "provider": "codex",
+    "model": "gpt-6.1-terra",
+    "options": [
+      {
+        "id": "reasoningEffort",
+        "value": "high"
+      },
+      {
+        "id": "serviceTier",
+        "value": "priority"
+      }
+    ],
+    "available": true
+  },
+  {
+    "provider": "claudeAgent",
+    "model": "claude-opus-5-5",
+    "options": [
+      {
+        "id": "effort",
+        "value": "high"
+      },
+      {
+        "id": "fastMode",
+        "value": false
+      }
+    ],
+    "available": true,
+    "speed": "Standard"
+  },
+  {
+    "provider": "claudeAgent",
+    "model": "claude-opus-5-5",
+    "options": [
+      {
+        "id": "effort",
+        "value": "high"
+      },
+      {
+        "id": "fastMode",
+        "value": true
+      }
+    ],
+    "available": true,
+    "speed": "Fast"
+  },
+  {
+    "provider": "claudeAgent",
+    "model": "claude-fable-5-2",
+    "options": [
+      {
+        "id": "effort",
+        "value": "high"
+      }
+    ],
+    "available": true,
+    "speed": "Standard"
+  },
+  {
+    "provider": "claudeAgent",
+    "model": "claude-fable-5-2",
+    "options": [
+      {
+        "id": "effort",
+        "value": "high"
+      }
+    ],
+    "available": false,
+    "unavailableReason": "Installed T3 catalog has no fastMode descriptor for Fable 5.2; reject, never downgrade.",
+    "speed": "Fast"
+  },
+  {
+    "provider": "claudeAgent",
+    "model": "claude-fable-5-2",
+    "options": [
+      {
+        "id": "effort",
+        "value": "medium"
+      }
+    ],
+    "available": true,
+    "speed": "Standard"
+  },
+  {
+    "provider": "claudeAgent",
+    "model": "claude-fable-5-2",
+    "options": [
+      {
+        "id": "effort",
+        "value": "medium"
+      }
+    ],
+    "available": false,
+    "unavailableReason": "Installed T3 catalog has no fastMode descriptor for Fable 5.2; reject, never downgrade.",
+    "speed": "Fast"
+  }
+]

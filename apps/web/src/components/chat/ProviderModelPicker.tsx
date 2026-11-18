@@ -1,3 +1,7 @@
+import { LocalPresetPicker } from "./LocalPresetPicker";
+import { usesLocalPicker } from "./localPickerPresets";
+import type { ModelSelection } from "@t3tools/contracts";
+import { Button } from "../ui/button";
 import {
   ANTIGRAVITY_DEFAULT_MODEL,
   type ProviderInstanceId,
@@ -28,6 +32,9 @@ import { useComposerMenuProps } from "./composerEventScope";
 import { shortcutLabelForCommand } from "../../keybindings";
 
 export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
+  currentSelection?: ModelSelection;
+  preserveLocalIdentity?: boolean;
+  onPresetSelect?: (selection: ModelSelection) => void;
   environmentId: EnvironmentId | null;
   /**
    * The instance currently selected in the composer. Drives the trigger
@@ -63,6 +70,12 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
 }) {
   const composerFloatingLayerProps = useComposerMenuProps();
   const [uncontrolledIsMenuOpen, setUncontrolledIsMenuOpen] = useState(false);
+  const [showFullCatalog, setShowFullCatalog] = useState(false);
+  const localPicker =
+    props.selectedModels === undefined &&
+    !!props.currentSelection &&
+    !!props.onPresetSelect &&
+    usesLocalPicker(props.instanceEntries);
   const isMenuOpen = props.open ?? uncontrolledIsMenuOpen;
   const size = props.size ?? "sm";
 
@@ -296,31 +309,70 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
         className="before:hidden"
         padding="none"
       >
-        <ModelPickerContent
-          environmentId={props.environmentId}
-          activeInstanceId={activeInstanceId}
-          model={props.model}
-          {...(props.selectedModels !== undefined ? { selectedModels: props.selectedModels } : {})}
-          {...(props.onToggleModel
-            ? {
-                onToggleModel: (instanceId: ProviderInstanceId, model: string) => {
-                  if (!props.disabled) props.onToggleModel?.(instanceId, model);
-                },
-              }
-            : {})}
-          lockedProvider={props.lockedProvider}
-          lockedContinuationGroupKey={props.lockedContinuationGroupKey ?? null}
-          instanceEntries={props.instanceEntries}
-          {...(props.keybindings ? { keybindings: props.keybindings } : {})}
-          modelOptionsByInstance={props.modelOptionsByInstance}
-          terminalOpen={props.terminalOpen ?? false}
-          onRequestClose={() => setIsMenuOpen(false)}
-          {...(props.onOpenProviderSetup ? { onOpenProviderSetup: props.onOpenProviderSetup } : {})}
-          {...(props.getModelDisabledReason
-            ? { getModelDisabledReason: props.getModelDisabledReason }
-            : {})}
-          onInstanceModelChange={handleInstanceModelChange}
-        />
+        {localPicker ? (
+          <Button variant="ghost" size="sm" onClick={() => setShowFullCatalog(!showFullCatalog)}>
+            {showFullCatalog
+              ? "Back to presets"
+              : props.onToggleModel
+                ? "All models / select multiple"
+                : "All models"}
+          </Button>
+        ) : null}
+        {localPicker && !showFullCatalog && props.currentSelection ? (
+          <LocalPresetPicker
+            entries={props.instanceEntries}
+            current={props.currentSelection}
+            preserveLegacy={props.preserveLocalIdentity}
+            disabled={props.disabled}
+            getDisabledReason={(selection) => {
+              const entry = props.instanceEntries.find(
+                (e) => e.instanceId === selection.instanceId,
+              );
+              if (props.lockedProvider && entry?.driverKind !== props.lockedProvider)
+                return "Provider locked for this thread";
+              if (
+                props.lockedContinuationGroupKey &&
+                entry?.continuationGroupKey !== props.lockedContinuationGroupKey
+              )
+                return "Continuation unavailable";
+              return props.getModelDisabledReason?.(selection.instanceId, selection.model) ?? null;
+            }}
+            onSelect={(selection) => {
+              props.onPresetSelect?.(selection);
+              setIsMenuOpen(false);
+            }}
+          />
+        ) : (
+          <ModelPickerContent
+            environmentId={props.environmentId}
+            activeInstanceId={activeInstanceId}
+            model={props.model}
+            {...(props.selectedModels !== undefined
+              ? { selectedModels: props.selectedModels }
+              : {})}
+            {...(props.onToggleModel
+              ? {
+                  onToggleModel: (instanceId: ProviderInstanceId, model: string) => {
+                    if (!props.disabled) props.onToggleModel?.(instanceId, model);
+                  },
+                }
+              : {})}
+            lockedProvider={props.lockedProvider}
+            lockedContinuationGroupKey={props.lockedContinuationGroupKey ?? null}
+            instanceEntries={props.instanceEntries}
+            {...(props.keybindings ? { keybindings: props.keybindings } : {})}
+            modelOptionsByInstance={props.modelOptionsByInstance}
+            terminalOpen={props.terminalOpen ?? false}
+            onRequestClose={() => setIsMenuOpen(false)}
+            {...(props.onOpenProviderSetup
+              ? { onOpenProviderSetup: props.onOpenProviderSetup }
+              : {})}
+            {...(props.getModelDisabledReason
+              ? { getModelDisabledReason: props.getModelDisabledReason }
+              : {})}
+            onInstanceModelChange={handleInstanceModelChange}
+          />
+        )}
         {props.selectedModels === undefined ? (
           <ChatGptSharingControl provider={activeEntry?.snapshot ?? null} />
         ) : null}

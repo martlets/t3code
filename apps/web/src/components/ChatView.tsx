@@ -10543,7 +10543,7 @@ export default function ChatView(props: ChatViewProps) {
   const onProviderModelSelect = (
     instanceId: ProviderInstanceId,
     model: string,
-    options?: { focusComposer?: boolean },
+    options?: { focusComposer?: boolean; selection?: ModelSelection },
   ) => {
     if (!activeThread) return;
     // Look up the configured instance so model normalization and custom
@@ -10587,14 +10587,23 @@ export default function ChatView(props: ChatViewProps) {
       if (options?.focusComposer !== false) scheduleComposerFocus();
       return;
     }
+    // Presets carry the exact requested options; never normalize one to another model.
+    if (
+      options?.selection &&
+      (resolvedModel !== model ||
+        options.selection.instanceId !== instanceId ||
+        options.selection.model !== model)
+    )
+      return;
     // Restore this model's own remembered options; without any, start it
     // from its default rather than carrying the previous model's over.
     const rememberedOptions =
       useComposerDraftStore.getState().stickyOptionsByModelByProvider[instanceId]?.[resolvedModel];
     const nextModelSelection: ModelSelection =
-      rememberedOptions !== undefined && rememberedOptions.length > 0
+      options?.selection ??
+      (rememberedOptions !== undefined && rememberedOptions.length > 0
         ? { instanceId, model: resolvedModel, options: [...rememberedOptions] }
-        : { instanceId, model: resolvedModel };
+        : { instanceId, model: resolvedModel });
     const modelChangeBlockReason = getStartedThreadModelChangeBlockReason({
       providers: providerStatuses,
       hasStartedSession: activeRuntime !== null,
