@@ -1,10 +1,14 @@
+import { ModelPickerPresentation } from "@t3tools/contracts";
+import * as Schema from "effect/Schema";
+import payload from "../../../../server/src/provider/modelPickerPresentation.json";
+const presentation = Schema.decodeUnknownSync(ModelPickerPresentation)(payload);
 // @vitest-environment jsdom
 import { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vite-plus/test";
 import { ProviderInstanceId, type ModelSelection } from "@t3tools/contracts";
 import type { ProviderInstanceEntry } from "../../providerInstances";
-import { LocalPresetPicker } from "./LocalPresetPicker";
+import { PresetPicker } from "./PresetPicker";
 import catalog from "./fixtures/localPickerCatalog.json";
 
 const entries = catalog.map((p) => ({
@@ -51,7 +55,8 @@ it.each([true, false])(
     const before = structuredClone(current);
     await act(() =>
       root.render(
-        <LocalPresetPicker
+        <PresetPicker
+          presentation={presentation}
           entries={entries}
           current={current}
           preserveLegacy={preserveLegacy}
@@ -88,7 +93,8 @@ it("rejects locked and busy choices, and keeps current options when support disa
   const dispatch = vi.fn();
   await act(() =>
     root.render(
-      <LocalPresetPicker
+      <PresetPicker
+        presentation={presentation}
         entries={entries}
         current={current}
         onSelect={dispatch}
@@ -100,14 +106,21 @@ it("rejects locked and busy choices, and keeps current options when support disa
   expect(dispatch).not.toHaveBeenCalled();
   await act(() =>
     root.render(
-      <LocalPresetPicker entries={entries} current={current} onSelect={dispatch} disabled />,
+      <PresetPicker
+        presentation={presentation}
+        entries={entries}
+        current={current}
+        onSelect={dispatch}
+        disabled
+      />,
     ),
   );
   await act(() => button("gpt-6.1-sol · high · Standard").click());
   expect(dispatch).not.toHaveBeenCalled();
   await act(() =>
     root.render(
-      <LocalPresetPicker
+      <PresetPicker
+        presentation={presentation}
         entries={entries.map((e) => ({ ...e, models: [] }))}
         current={current}
         onSelect={dispatch}

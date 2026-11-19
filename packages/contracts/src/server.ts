@@ -23,6 +23,7 @@ import {
   ResolvedKeybindingsConfig,
 } from "./keybindings.ts";
 import { EditorId, FileManagerRevealKind, RemoteOpenTarget } from "./editor.ts";
+import { ModelSelection } from "./modelSelection.ts";
 import { ModelCapabilities } from "./model.ts";
 import { RuntimeMode } from "./providerPolicy.ts";
 import { ProviderDriverKind, ProviderInstanceId } from "./providerInstance.ts";
@@ -672,6 +673,28 @@ export const ServerDirectEndpoint = Schema.Struct({
 });
 export type ServerDirectEndpoint = typeof ServerDirectEndpoint.Type;
 
+/** Presentation only. Runtime provider identities and model catalogs remain authoritative for execution. */
+export const ModelPickerPresentation = Schema.Struct({
+  groups: Schema.Array(
+    Schema.Struct({
+      id: TrimmedNonEmptyString,
+      label: TrimmedNonEmptyString,
+      canonicalInstanceId: ProviderInstanceId,
+      preserveInstanceIds: Schema.Array(ProviderInstanceId),
+    }),
+  ),
+  presets: Schema.Array(
+    Schema.Struct({
+      id: TrimmedNonEmptyString,
+      groupId: TrimmedNonEmptyString,
+      label: TrimmedNonEmptyString,
+      selection: ModelSelection,
+      disabledReason: Schema.NullOr(TrimmedNonEmptyString),
+    }),
+  ),
+});
+export type ModelPickerPresentation = typeof ModelPickerPresentation.Type;
+
 export const ServerConfig = Schema.Struct({
   environment: ExecutionEnvironmentDescriptor,
   auth: ServerAuthDescriptor,
@@ -680,6 +703,7 @@ export const ServerConfig = Schema.Struct({
   keybindings: ResolvedKeybindingsConfig,
   issues: ServerConfigIssues,
   providers: ServerProviders,
+  modelPickerPresentation: Schema.optional(ModelPickerPresentation),
   // Editor ids grow over time; drop ones this build does not know rather than
   // failing the whole config decode.
   availableEditors: ForwardCompatibleArray(EditorId),
@@ -791,6 +815,7 @@ export type ServerRemoveKeybindingResult = typeof ServerRemoveKeybindingResult.T
 export const ServerConfigUpdatedPayload = Schema.Struct({
   issues: ServerConfigIssues,
   providers: ServerProviders,
+  modelPickerPresentation: Schema.optional(ModelPickerPresentation),
   settings: Schema.optional(ServerSettings),
 });
 export type ServerConfigUpdatedPayload = typeof ServerConfigUpdatedPayload.Type;
@@ -804,6 +829,7 @@ export type ServerConfigKeybindingsUpdatedPayload =
 
 export const ServerConfigProviderStatusesPayload = Schema.Struct({
   providers: ServerProviders,
+  modelPickerPresentation: Schema.optional(ModelPickerPresentation),
 });
 export type ServerConfigProviderStatusesPayload = typeof ServerConfigProviderStatusesPayload.Type;
 
@@ -954,6 +980,7 @@ export type ServerLifecycleStreamEvent = typeof ServerLifecycleStreamEvent.Type;
 
 export const ServerProviderUpdatedPayload = Schema.Struct({
   providers: ServerProviders,
+  modelPickerPresentation: Schema.optional(ModelPickerPresentation),
 });
 export type ServerProviderUpdatedPayload = typeof ServerProviderUpdatedPayload.Type;
 

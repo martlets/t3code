@@ -164,6 +164,9 @@ export function ProjectDefaultsSettings({ category }: { category: ProjectSetting
         selection && activeEntry ? (
           <div className="flex min-w-0 flex-wrap items-center justify-end gap-1.5">
             <ProviderModelPicker
+              currentSelection={selection}
+              preservePresetIdentity={false}
+              onPresetSelect={setModel}
               environmentId={representative?.environmentId ?? null}
               activeInstanceId={selection.instanceId}
               model={selection.model}

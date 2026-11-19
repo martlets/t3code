@@ -1,5 +1,5 @@
-import { LocalPresetPicker } from "./LocalPresetPicker";
-import { usesLocalPicker } from "./localPickerPresets";
+import { PresetPicker } from "./PresetPicker";
+import { useServerConfigs } from "../../state/entities";
 import type { ModelSelection } from "@t3tools/contracts";
 import { Button } from "../ui/button";
 import {
@@ -33,7 +33,7 @@ import { shortcutLabelForCommand } from "../../keybindings";
 
 export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
   currentSelection?: ModelSelection;
-  preserveLocalIdentity?: boolean;
+  preservePresetIdentity?: boolean;
   onPresetSelect?: (selection: ModelSelection) => void;
   environmentId: EnvironmentId | null;
   /**
@@ -71,8 +71,12 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
   const composerFloatingLayerProps = useComposerMenuProps();
   const [uncontrolledIsMenuOpen, setUncontrolledIsMenuOpen] = useState(false);
   const [showFullCatalog, setShowFullCatalog] = useState(props.selectedModels !== undefined);
-  const localPicker =
-    !!props.currentSelection && !!props.onPresetSelect && usesLocalPicker(props.instanceEntries);
+  const configs = useServerConfigs();
+  const presentation = props.environmentId
+    ? configs.get(props.environmentId)?.modelPickerPresentation
+    : undefined;
+  const presetPicker =
+    !!props.currentSelection && !!props.onPresetSelect && presentation !== undefined;
   const isMenuOpen = props.open ?? uncontrolledIsMenuOpen;
   const size = props.size ?? "sm";
 
@@ -106,7 +110,9 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
     ? `${getTriggerDisplayModelLabel(selectedModel)}${selectedModel.isUnavailable ? " (Unavailable)" : ""}`
     : triggerTitle;
   const showInstanceBadge =
-    activeEntry !== null && shouldShowInstanceBadge(activeEntry, props.instanceEntries);
+    !presetPicker &&
+    activeEntry !== null &&
+    shouldShowInstanceBadge(activeEntry, props.instanceEntries);
 
   const setIsMenuOpen = (open: boolean) => {
     props.onOpenChange?.(open);
@@ -306,7 +312,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
         className="before:hidden"
         padding="none"
       >
-        {localPicker ? (
+        {presetPicker ? (
           <Button variant="ghost" size="sm" onClick={() => setShowFullCatalog(!showFullCatalog)}>
             {showFullCatalog
               ? "Back to presets"
@@ -315,11 +321,12 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
                 : "All models"}
           </Button>
         ) : null}
-        {localPicker && !showFullCatalog && props.currentSelection ? (
-          <LocalPresetPicker
+        {presetPicker && !showFullCatalog && props.currentSelection && presentation ? (
+          <PresetPicker
+            presentation={presentation}
             entries={props.instanceEntries}
             current={props.currentSelection}
-            preserveLegacy={props.preserveLocalIdentity}
+            preserveLegacy={props.preservePresetIdentity}
             disabled={props.disabled}
             getDisabledReason={(selection) => {
               const entry = props.instanceEntries.find(

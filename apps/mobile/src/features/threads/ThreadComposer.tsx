@@ -705,7 +705,11 @@ export const ThreadComposer = memo(function ThreadComposer(props: ThreadComposer
       selectedModel: currentModelSelection,
       reportedModelSelection: props.reportedModelSelection,
       onSelectModel: (option) =>
-        props.onUpdateModelSelection(withRememberedModelOptions(option.selection)),
+        props.onUpdateModelSelection(
+          option.isPreset || option.selection.options !== undefined
+            ? option.selection
+            : withRememberedModelOptions(option.selection),
+        ),
       optionDescriptors: providerOptionDescriptors,
       onUpdateOptionSelections: (options) => {
         rememberModelOptions(

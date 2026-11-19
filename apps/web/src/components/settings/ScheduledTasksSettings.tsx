@@ -1,3 +1,4 @@
+import { createModelSelection } from "@t3tools/shared/model";
 import { useAtomValue } from "@effect/atom-react";
 import {
   Clock3Icon,
@@ -1134,6 +1135,20 @@ function ScheduledTaskEditorDialog({
                 <ProviderModelPicker
                   environmentId={environmentId}
                   disabled={saving || !connected}
+                  currentSelection={
+                    draft.baseModelSelection?.instanceId === activeInstanceId &&
+                    draft.baseModelSelection.model === activeModel
+                      ? draft.baseModelSelection
+                      : createModelSelection(activeInstanceId, activeModel)
+                  }
+                  preservePresetIdentity={task !== null}
+                  onPresetSelect={(selection) =>
+                    setDraft((current) => ({
+                      ...current,
+                      modelKey: `${selection.instanceId}:${selection.model}`,
+                      baseModelSelection: selection,
+                    }))
+                  }
                   activeInstanceId={activeInstanceId}
                   model={activeModel}
                   lockedProvider={null}

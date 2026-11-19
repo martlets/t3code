@@ -1,0 +1,290 @@
+{
+  "groups": [
+    {
+      "id": "codex",
+      "label": "Codex",
+      "canonicalInstanceId": "codex",
+      "preserveInstanceIds": ["codexHigh"]
+    },
+    {
+      "id": "claude",
+      "label": "Claude",
+      "canonicalInstanceId": "claudeAgent",
+      "preserveInstanceIds": []
+    }
+  ],
+  "presets": [
+    {
+      "id": "gpt-6-astra-high-standard",
+      "groupId": "codex",
+      "label": "gpt-6-astra \u00b7 high \u00b7 Standard",
+      "selection": {
+        "instanceId": "codex",
+        "model": "gpt-6-astra",
+        "options": [
+          {
+            "id": "reasoningEffort",
+            "value": "high"
+          },
+          {
+            "id": "serviceTier",
+            "value": "default"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "gpt-6-astra-high-fast",
+      "groupId": "codex",
+      "label": "gpt-6-astra \u00b7 high \u00b7 Fast",
+      "selection": {
+        "instanceId": "codex",
+        "model": "gpt-6-astra",
+        "options": [
+          {
+            "id": "reasoningEffort",
+            "value": "high"
+          },
+          {
+            "id": "serviceTier",
+            "value": "priority"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "gpt-6-astra-medium-standard",
+      "groupId": "codex",
+      "label": "gpt-6-astra \u00b7 medium \u00b7 Standard",
+      "selection": {
+        "instanceId": "codex",
+        "model": "gpt-6-astra",
+        "options": [
+          {
+            "id": "reasoningEffort",
+            "value": "medium"
+          },
+          {
+            "id": "serviceTier",
+            "value": "default"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "gpt-6-astra-medium-fast",
+      "groupId": "codex",
+      "label": "gpt-6-astra \u00b7 medium \u00b7 Fast",
+      "selection": {
+        "instanceId": "codex",
+        "model": "gpt-6-astra",
+        "options": [
+          {
+            "id": "reasoningEffort",
+            "value": "medium"
+          },
+          {
+            "id": "serviceTier",
+            "value": "priority"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "gpt-6.1-sol-high-standard",
+      "groupId": "codex",
+      "label": "gpt-6.1-sol \u00b7 high \u00b7 Standard",
+      "selection": {
+        "instanceId": "codex",
+        "model": "gpt-6.1-sol",
+        "options": [
+          {
+            "id": "reasoningEffort",
+            "value": "high"
+          },
+          {
+            "id": "serviceTier",
+            "value": "default"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "gpt-6.1-sol-high-fast",
+      "groupId": "codex",
+      "label": "gpt-6.1-sol \u00b7 high \u00b7 Fast",
+      "selection": {
+        "instanceId": "codex",
+        "model": "gpt-6.1-sol",
+        "options": [
+          {
+            "id": "reasoningEffort",
+            "value": "high"
+          },
+          {
+            "id": "serviceTier",
+            "value": "priority"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "gpt-6.1-terra-high-standard",
+      "groupId": "codex",
+      "label": "gpt-6.1-terra \u00b7 high \u00b7 Standard",
+      "selection": {
+        "instanceId": "codex",
+        "model": "gpt-6.1-terra",
+        "options": [
+          {
+            "id": "reasoningEffort",
+            "value": "high"
+          },
+          {
+            "id": "serviceTier",
+            "value": "default"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "gpt-6.1-terra-high-fast",
+      "groupId": "codex",
+      "label": "gpt-6.1-terra \u00b7 high \u00b7 Fast",
+      "selection": {
+        "instanceId": "codex",
+        "model": "gpt-6.1-terra",
+        "options": [
+          {
+            "id": "reasoningEffort",
+            "value": "high"
+          },
+          {
+            "id": "serviceTier",
+            "value": "priority"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "claude-opus-5-5-high-standard",
+      "groupId": "claude",
+      "label": "claude-opus-5-5 \u00b7 high \u00b7 Standard",
+      "selection": {
+        "instanceId": "claudeAgent",
+        "model": "claude-opus-5-5",
+        "options": [
+          {
+            "id": "effort",
+            "value": "high"
+          },
+          {
+            "id": "fastMode",
+            "value": false
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "claude-opus-5-5-high-fast",
+      "groupId": "claude",
+      "label": "claude-opus-5-5 \u00b7 high \u00b7 Fast",
+      "selection": {
+        "instanceId": "claudeAgent",
+        "model": "claude-opus-5-5",
+        "options": [
+          {
+            "id": "effort",
+            "value": "high"
+          },
+          {
+            "id": "fastMode",
+            "value": true
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "claude-fable-5-2-high-standard",
+      "groupId": "claude",
+      "label": "claude-fable-5-2 \u00b7 high \u00b7 Standard",
+      "selection": {
+        "instanceId": "claudeAgent",
+        "model": "claude-fable-5-2",
+        "options": [
+          {
+            "id": "effort",
+            "value": "high"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "claude-fable-5-2-high-fast",
+      "groupId": "claude",
+      "label": "claude-fable-5-2 \u00b7 high \u00b7 Fast",
+      "selection": {
+        "instanceId": "claudeAgent",
+        "model": "claude-fable-5-2",
+        "options": [
+          {
+            "id": "effort",
+            "value": "high"
+          },
+          {
+            "id": "fastMode",
+            "value": true
+          }
+        ]
+      },
+      "disabledReason": "Installed T3 catalog has no fastMode descriptor for Fable 5.2; reject, never downgrade."
+    },
+    {
+      "id": "claude-fable-5-2-medium-standard",
+      "groupId": "claude",
+      "label": "claude-fable-5-2 \u00b7 medium \u00b7 Standard",
+      "selection": {
+        "instanceId": "claudeAgent",
+        "model": "claude-fable-5-2",
+        "options": [
+          {
+            "id": "effort",
+            "value": "medium"
+          }
+        ]
+      },
+      "disabledReason": null
+    },
+    {
+      "id": "claude-fable-5-2-medium-fast",
+      "groupId": "claude",
+      "label": "claude-fable-5-2 \u00b7 medium \u00b7 Fast",
+      "selection": {
+        "instanceId": "claudeAgent",
+        "model": "claude-fable-5-2",
+        "options": [
+          {
+            "id": "effort",
+            "value": "medium"
+          },
+          {
+            "id": "fastMode",
+            "value": true
+          }
+        ]
+      },
+      "disabledReason": "Installed T3 catalog has no fastMode descriptor for Fable 5.2; reject, never downgrade."
+    }
+  ]
+}

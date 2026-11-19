@@ -1,3 +1,5 @@
+import { vi } from "vite-plus/test";
+vi.mock("../../state/entities", () => ({ useServerConfigs: () => new Map() }));
 import {
   ANTIGRAVITY_DEFAULT_MODEL,
   ProviderDriverKind,

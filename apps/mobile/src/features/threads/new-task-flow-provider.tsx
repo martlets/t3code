@@ -40,6 +40,7 @@ import type { DraftComposerAttachment } from "../../lib/composerImages";
 import type { ModelOption, ProviderGroup } from "../../lib/modelOptions";
 import {
   buildModelOptions,
+  buildPresetModelOptions,
   groupByProvider,
   resolveDefaultableModelSelection,
   resolveNewTaskModelSelection,
@@ -650,13 +651,26 @@ export function NewTaskFlowProvider(props: React.PropsWithChildren) {
       if (!key || !selectedProjectDraftKey) {
         return;
       }
-      const option = modelOptions.find((candidate) => candidate.key === key);
-      if (!option) {
+      const option =
+        modelOptions.find((candidate) => candidate.key === key) ??
+        buildPresetModelOptions(
+          selectedEnvironmentServerConfig,
+          selectedModel,
+          undefined,
+          selectedProject?.id ?? null,
+          false,
+        ).find((candidate) => candidate.key === key);
+      if (!option || option.isUnavailable) {
         return;
       }
-      const selection = withRememberedModelOptions(
-        options ? { ...option.selection, options } : option.selection,
-      );
+      const selection =
+        option.isPreset || option.selection.options !== undefined
+          ? options
+            ? { ...option.selection, options }
+            : option.selection
+          : withRememberedModelOptions(
+              options ? { ...option.selection, options } : option.selection,
+            );
       const provider = selectedEnvironmentServerConfig?.providers.find(
         (candidate) => candidate.instanceId === selection.instanceId,
       );
@@ -668,7 +682,13 @@ export function NewTaskFlowProvider(props: React.PropsWithChildren) {
       });
       setStickyComposerModelSelection(selection);
     },
-    [modelOptions, selectedEnvironmentServerConfig, selectedProjectDraftKey],
+    [
+      modelOptions,
+      selectedModel,
+      selectedProject?.id,
+      selectedEnvironmentServerConfig,
+      selectedProjectDraftKey,
+    ],
   );
   const setSelectedModelOptions = useCallback(
     (options: ReadonlyArray<ProviderOptionSelection> | undefined) => {

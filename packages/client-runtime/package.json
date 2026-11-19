@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./model-picker": {
+      "types": "./src/modelPicker.ts",
+      "default": "./src/modelPicker.ts"
+    },
     "./composerThreadItems": {
       "types": "./src/composerThreadItems.ts",
       "default": "./src/composerThreadItems.ts"

@@ -41,6 +41,7 @@ source alone does not explain. Most code changes do not need an internal documen
 - [Providers](./internals/providers.md)
 - [Adding a provider](./internals/adding-a-provider.md)
 - [Pull request file revisions](./internals/pull-request-file-revisions.md)
+- [Model picker presentation contract](./internals/model-picker-presentation.md)
 - [Model classification](./internals/model-manifest.md)
 - [Remote environments](./internals/remote.md)
 - [Server updates](./internals/server-updates.md)

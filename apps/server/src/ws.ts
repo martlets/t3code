@@ -1,3 +1,4 @@
+import { modelPickerPresentation } from "./provider/modelPickerPresentation.ts";
 import { OrchestrationDispatchCommandError } from "@t3tools/contracts";
 import * as Crypto from "effect/Crypto";
 import * as Orchestrator from "./orchestration-v2/Orchestrator.ts";
@@ -348,7 +349,14 @@ export const withLateEditorConfig = <E, R>(
           case "keybindingsUpdated":
             return [{ ...current, ...event.payload }, [event]];
           case "providerStatuses":
-            return [{ ...current, providers: event.payload.providers }, [event]];
+            return [
+              {
+                ...current,
+                ...event.payload,
+                modelPickerPresentation: event.payload.modelPickerPresentation,
+              },
+              [event],
+            ];
           case "settingsUpdated":
             return [{ ...current, settings: event.payload.settings }, [event]];
           // Themes and usage-limit sources never ride in a snapshot; clients
@@ -1721,6 +1729,7 @@ const layerWsRpc = (
             keybindings: keybindingsConfig.keybindings,
             issues: keybindingsConfig.issues,
             providers,
+            modelPickerPresentation: modelPickerPresentation(providers),
             ...editorConfig,
             // Same discovery-with-timeout treatment as editors: a slow probe
             // must not stall server.getConfig, so it degrades to no targets.
@@ -3027,7 +3036,10 @@ const layerWsRpc = (
                 Stream.map((providers) => ({
                   version: 1 as const,
                   type: "providerStatuses" as const,
-                  payload: { providers },
+                  payload: {
+                    providers,
+                    modelPickerPresentation: modelPickerPresentation(providers),
+                  },
                 })),
                 Stream.debounce(Duration.millis(PROVIDER_STATUS_DEBOUNCE_MS)),
               );

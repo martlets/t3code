@@ -1,4 +1,4 @@
-import { localSelectionLabel } from "./chat/localPickerPresets";
+import { selectionLabel } from "./chat/modelPickerPresentation";
 import { type EnvironmentId, type ScopedProjectRef } from "@t3tools/contracts";
 import { ThreadHoverCard, ThreadHoverCardPopup } from "./ThreadHoverCard";
 import { CollapsibleSectionHeader } from "./ui/collapsible-section-header";
@@ -541,8 +541,8 @@ function SidebarThreadTooltip({
             />
             <div className="min-w-0 truncate text-foreground/75">
               {showInstanceBadge && providerEntry
-                ? `Saved thread: ${localSelectionLabel(thread.modelSelection, modelLabel)} · ${providerEntry.displayName}`
-                : `Saved thread: ${localSelectionLabel(thread.modelSelection, modelLabel)}`}
+                ? `Saved thread: ${selectionLabel(thread.modelSelection, modelLabel)} · ${providerEntry.displayName}`
+                : `Saved thread: ${selectionLabel(thread.modelSelection, modelLabel)}`}
             </div>
           </div>
         ) : null}

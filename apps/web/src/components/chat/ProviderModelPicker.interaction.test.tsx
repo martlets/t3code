@@ -2,11 +2,21 @@
 import { act, useState, type ReactNode } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, expect, it, vi } from "vite-plus/test";
-import { ProviderInstanceId, type ModelSelection } from "@t3tools/contracts";
+import { EnvironmentId, ProviderInstanceId, type ModelSelection } from "@t3tools/contracts";
 import type { ProviderInstanceEntry } from "../../providerInstances";
 import { ProviderModelPicker } from "./ProviderModelPicker";
 import catalog from "./fixtures/localPickerCatalog.json";
 
+vi.mock("../../state/entities", async () => {
+  const { ModelPickerPresentation } = await import("@t3tools/contracts");
+  const Schema = await import("effect/Schema");
+  const { default: payload } =
+    await import("../../../../server/src/provider/modelPickerPresentation.json");
+  const presentation = Schema.decodeSync(ModelPickerPresentation)(payload);
+  return {
+    useServerConfigs: () => new Map([["test", { modelPickerPresentation: presentation }]]),
+  };
+});
 const entries = catalog.map((p) => ({
   ...p,
   driverKind: p.instanceId === "claudeAgent" ? "claudeAgent" : "codex",
@@ -74,9 +84,9 @@ function Harness({ multiple = false }: { multiple?: boolean }) {
     <>
       <output>{JSON.stringify({ selection, fanout })}</output>
       <ProviderModelPicker
-        preserveLocalIdentity={false}
+        preservePresetIdentity={false}
         open
-        environmentId={null}
+        environmentId={EnvironmentId.make("test")}
         lockedProvider={null}
         currentSelection={selection}
         activeInstanceId={selection.instanceId}

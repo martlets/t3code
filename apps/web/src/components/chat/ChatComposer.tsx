@@ -1,4 +1,4 @@
-import { localSelectionLabel } from "./localPickerPresets";
+import { selectionLabel } from "./modelPickerPresentation";
 import { formatProviderSkillDisplayName } from "@t3tools/shared/inlineSkills";
 import { useComposerTypingGuard } from "./useComposerTypingGuard";
 import { DESKTOP_PASTE_AS_TEXT_EVENT } from "../../lib/desktopPasteAsText";
@@ -5400,7 +5400,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
       ) : null}
       <ProviderModelPicker
         currentSelection={selectedModelSelection}
-        preserveLocalIdentity={routeKind === "server"}
+        preservePresetIdentity={routeKind === "server"}
         onPresetSelect={(selection) => {
           setMultipleModelSelections(null);
           onProviderModelSelect(
@@ -5409,7 +5409,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
             selection.options ? { selection } : undefined,
           );
         }}
-        selectionLabel={localSelectionLabel(selectedModelSelection)}
+        selectionLabel={selectionLabel(selectedModelSelection)}
         environmentId={environmentId}
         compact={false}
         isComposerOwned

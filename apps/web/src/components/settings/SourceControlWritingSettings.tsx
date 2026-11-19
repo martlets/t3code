@@ -354,6 +354,11 @@ export function SourceControlWritingSettingsSection() {
               {usesDedicatedModel && canEnableDedicatedModel ? (
                 <ProviderModelPicker
                   environmentId={environmentId}
+                  currentSelection={activeSelection}
+                  preservePresetIdentity={false}
+                  onPresetSelect={(selection) =>
+                    updateSettings({ sourceControlWriterModelSelection: selection })
+                  }
                   activeInstanceId={activeSelection.instanceId}
                   model={activeSelection.model}
                   lockedProvider={null}
@@ -471,6 +476,11 @@ export function SourceControlWritingSettingsSection() {
                   {(usesReviewGuideModel || mixedReviewGuideModel) && canEnableDedicatedModel ? (
                     <ProviderModelPicker
                       environmentId={environmentId}
+                      currentSelection={reviewGuideSelection}
+                      preservePresetIdentity={false}
+                      onPresetSelect={(selection) =>
+                        updateSettings({ reviewGuideModelSelection: selection })
+                      }
                       activeInstanceId={reviewGuideSelection.instanceId}
                       model={reviewGuideSelection.model}
                       lockedProvider={null}

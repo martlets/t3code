@@ -64,6 +64,7 @@ export function applyServerConfigProjection(
         config: {
           ...projection.config,
           providers: event.payload.providers,
+          modelPickerPresentation: event.payload.modelPickerPresentation,
         },
         latestEvent: event,
         source: "live",

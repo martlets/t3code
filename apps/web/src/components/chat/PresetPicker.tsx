@@ -1,9 +1,10 @@
 import { useRef } from "react";
-import type { ModelSelection } from "@t3tools/contracts";
+import type { ModelPickerPresentation, ModelSelection } from "@t3tools/contracts";
 import type { ProviderInstanceEntry } from "../../providerInstances";
-import { localPickerRows, localSelectionLabel } from "./localPickerPresets";
+import { pickerPresetRows, selectionLabel } from "./modelPickerPresentation";
 
-export function LocalPresetPicker(props: {
+export function PresetPicker(props: {
+  presentation: ModelPickerPresentation;
   entries: ReadonlyArray<ProviderInstanceEntry>;
   current: ModelSelection;
   preserveLegacy?: boolean | undefined;
@@ -12,7 +13,12 @@ export function LocalPresetPicker(props: {
   onSelect: (selection: ModelSelection) => void;
 }) {
   const list = useRef<HTMLDivElement>(null);
-  const rows = localPickerRows(props.entries, props.current, props.preserveLegacy);
+  const rows = pickerPresetRows(
+    props.entries,
+    props.current,
+    props.preserveLegacy,
+    props.presentation,
+  );
   return (
     <div
       data-model-picker-content
@@ -38,12 +44,15 @@ export function LocalPresetPicker(props: {
       }}
     >
       <div className="p-2 text-sm">
-        <div>Current selection: {localSelectionLabel(props.current)}</div>
+        <div>Current selection: {selectionLabel(props.current)}</div>
         <div className="text-xs text-muted-foreground">
           Profile:{" "}
-          {props.current.instanceId === "codexHigh"
-            ? "Codex (legacy defaults)"
-            : props.current.instanceId}
+          {props.presentation.groups.find(
+            (group) =>
+              group.canonicalInstanceId === props.current.instanceId ||
+              group.preserveInstanceIds.includes(props.current.instanceId),
+          )?.label ?? props.current.instanceId}{" "}
+          ({props.current.instanceId})
         </div>
       </div>
       <p className="px-2 pb-2 text-xs text-muted-foreground">
@@ -53,7 +62,7 @@ export function LocalPresetPicker(props: {
       {rows.map((row, index) => {
         const reason = row.reason ?? props.getDisabledReason?.(row.selection);
         return (
-          <div key={`${row.selection.instanceId}:${row.label}`}>
+          <div key={row.id}>
             {index === 0 || rows[index - 1]?.group !== row.group ? (
               <div className="p-2 font-medium text-sm">{row.group}</div>
             ) : null}

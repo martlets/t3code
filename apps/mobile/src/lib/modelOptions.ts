@@ -1,3 +1,7 @@
+import {
+  resolveModelPickerPresets,
+  samePickerSelection,
+} from "@t3tools/client-runtime/model-picker";
 import type { MenuAction } from "@react-native-menu/menu";
 import type {
   ModelCapabilities,
@@ -14,6 +18,7 @@ import {
 
 export type ModelOption = {
   readonly key: string;
+  readonly isPreset?: boolean;
   readonly label: string;
   readonly subtitle: string;
   readonly providerKey: string;
@@ -334,9 +339,10 @@ export function buildModelOptions(
     fallbackModelSelection &&
     (providerInstanceId === undefined ||
       fallbackModelSelection.instanceId === providerInstanceId) &&
-    (!config?.settings?.providerModelPreferences?.[
-      fallbackModelSelection.instanceId
-    ]?.hiddenModels.includes(fallbackModelSelection.model) ||
+    (config?.modelPickerPresentation !== undefined ||
+      !config?.settings?.providerModelPreferences?.[
+        fallbackModelSelection.instanceId
+      ]?.hiddenModels.includes(fallbackModelSelection.model) ||
       config?.providers
         .find((provider) => provider.instanceId === fallbackModelSelection.instanceId)
         ?.models.find((model) => model.slug === fallbackModelSelection.model)?.isCustom)
@@ -347,7 +353,7 @@ export function buildModelOptions(
       options.set(key, {
         ...existing,
         selection:
-          existing.providerDriver === "antigravity"
+          config?.modelPickerPresentation !== undefined || existing.providerDriver === "antigravity"
             ? fallbackModelSelection
             : normalizeSelectionOptions(fallbackModelSelection, existing.capabilities),
       });
@@ -389,6 +395,57 @@ export function buildModelOptions(
   return [...options.values()];
 }
 
+/** Presentation rows never replace the runtime catalog used for defaults, option controls or full-catalog browsing. */
+export function buildPresetModelOptions(
+  config: T3ServerConfig | null | undefined,
+  current: ModelSelection | null,
+  lockedInstanceId: ModelSelection["instanceId"] | undefined,
+  projectId: ProjectId | null,
+  preserveIdentity = true,
+): ReadonlyArray<ModelOption> {
+  return resolveModelPickerPresets(
+    config?.modelPickerPresentation,
+    (config?.providers ?? []).map((provider) => ({
+      instanceId: provider.instanceId,
+      available:
+        isProviderEnabledForProject(config, provider, projectId) &&
+        provider.installed &&
+        provider.auth.status !== "unauthenticated" &&
+        provider.status === "ready" &&
+        provider.availability !== "unavailable",
+      models: provider.models,
+    })),
+    current,
+    preserveIdentity,
+  ).map((row) => {
+    const provider = config?.providers.find(
+      (candidate) => candidate.instanceId === row.selection.instanceId,
+    );
+    const model = provider?.models.find((candidate) => candidate.slug === row.selection.model);
+    const reason =
+      row.reason ??
+      (lockedInstanceId && lockedInstanceId !== row.selection.instanceId
+        ? "Provider locked for this thread"
+        : null);
+    return {
+      key: `preset:${row.id}`,
+      isPreset: true,
+      label: row.label,
+      subtitle: reason ?? "",
+      providerKey: `presets:${row.groupId}`,
+      providerLabel: row.group,
+      providerDriver: provider?.driver ?? row.selection.instanceId,
+      supportedRuntimeModes: provider?.supportedRuntimeModes,
+      isDefault: false,
+      isLegacy: false,
+      isUnavailable: reason !== null,
+      canHide: false,
+      capabilities: model?.capabilities ?? null,
+      selection: row.selection,
+    };
+  });
+}
+
 export function groupByProvider(options: ReadonlyArray<ModelOption>): ReadonlyArray<ProviderGroup> {
   const groups = new Map<
     string,
@@ -424,9 +481,13 @@ function modelMenuAction(option: ModelOption, selectedModel: ModelSelection | nu
   return {
     id: `model:${option.key}`,
     title: option.label,
-    state:
-      option.selection.instanceId === selectedModel?.instanceId &&
-      option.selection.model === selectedModel.model
+    attributes: { disabled: option.isUnavailable === true },
+    state: option.isPreset
+      ? samePickerSelection(option.selection, selectedModel)
+        ? "on"
+        : undefined
+      : option.selection.instanceId === selectedModel?.instanceId &&
+          option.selection.model === selectedModel.model
         ? "on"
         : undefined,
   };

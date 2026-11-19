@@ -1,3 +1,4 @@
+import { samePickerSelection } from "@t3tools/client-runtime/model-picker";
 import { createV5StackNavigator as createNativeStackNavigator } from "../../native/createV5StackNavigator";
 import { DEFAULT_SERVER_SETTINGS } from "@t3tools/contracts";
 import {
@@ -59,6 +60,7 @@ import { ThemedSwitch } from "../../components/ThemedSwitch";
 import { cn } from "../../lib/cn";
 import {
   buildModelOptions,
+  buildPresetModelOptions,
   groupByProvider,
   type ModelOption,
   type ProviderGroup,
@@ -252,6 +254,7 @@ type ThreadSettingsSubmenuPage =
   | { readonly kind: "runtime" };
 
 type ThreadSettingsSessionProps = {
+  readonly preservePresetIdentity?: boolean;
   readonly environmentId: EnvironmentId | null;
   readonly projectId: ProjectId | null;
   readonly providerInstanceId?: ProviderInstanceId;
@@ -308,6 +311,9 @@ export function useExistingThreadSettingsRoutePresentation() {
 }
 
 type ThreadSettingsSessionValue = {
+  readonly hasPresets: boolean;
+  readonly showFullCatalog: boolean;
+  readonly toggleCatalog: () => void;
   readonly environmentId: EnvironmentId | null;
   readonly providerInstanceId?: ProviderInstanceId;
   readonly providerGroups: ReadonlyArray<ProviderGroup>;
@@ -352,6 +358,25 @@ function ThreadSettingsSessionProvider(
   const configs = useAtomValue(environmentServerConfigsAtom);
   const config = props.environmentId ? configs.get(props.environmentId) : undefined;
   const settings = config?.settings;
+  const [showFullCatalog, setShowFullCatalog] = useState(false);
+  const hasPresets = config?.modelPickerPresentation !== undefined;
+  const presetOptions = useMemo(
+    () =>
+      buildPresetModelOptions(
+        config,
+        props.selectedModel,
+        props.lockedProviderInstanceId,
+        props.projectId,
+        props.preservePresetIdentity,
+      ),
+    [
+      config,
+      props.selectedModel,
+      props.lockedProviderInstanceId,
+      props.projectId,
+      props.preservePresetIdentity,
+    ],
+  );
   const [manageHidden, setManageHidden] = useState(false);
   const pendingHidden = useRef(new Set<string>());
   const pendingFavorites = useRef(
@@ -370,9 +395,14 @@ function ThreadSettingsSessionProvider(
               true,
             ),
           )
-        : props.providerGroups,
+        : hasPresets && !showFullCatalog
+          ? groupByProvider(presetOptions)
+          : props.providerGroups,
     [
       config,
+      hasPresets,
+      showFullCatalog,
+      presetOptions,
       manageHidden,
       props.providerGroups,
       props.selectedModel,
@@ -512,8 +542,10 @@ function ThreadSettingsSessionProvider(
 
   const isApplied = useCallback(
     (option: ModelOption) =>
-      option.selection.instanceId === props.selectedModel?.instanceId &&
-      option.selection.model === props.selectedModel.model,
+      option.isPreset
+        ? samePickerSelection(option.selection, props.selectedModel)
+        : option.selection.instanceId === props.selectedModel?.instanceId &&
+          option.selection.model === props.selectedModel.model,
     [props.selectedModel],
   );
   // The list highlights the staged pick; Save turns it into the applied one.
@@ -558,7 +590,12 @@ function ThreadSettingsSessionProvider(
   );
   const commitPendingModel = useCallback(() => {
     if (pendingModel) {
-      if (!canCommitPendingModel(pendingModel, props.providerGroups)) {
+      if (
+        !canCommitPendingModel(pendingModel, [
+          ...props.providerGroups,
+          ...groupByProvider(presetOptions),
+        ])
+      ) {
         Alert.alert(
           "Model unavailable",
           "Set up this provider on web or desktop, or select another model.",
@@ -569,7 +606,7 @@ function ThreadSettingsSessionProvider(
       props.onSelectModel(pendingModel);
     }
     return true;
-  }, [pendingModel, props.onSelectModel, props.providerGroups]);
+  }, [pendingModel, presetOptions, props.onSelectModel, props.providerGroups]);
 
   const applyOptionChange = useCallback(
     (id: string, value: string | boolean) => {
@@ -602,6 +639,7 @@ function ThreadSettingsSessionProvider(
 
   const pressModel = useCallback(
     (option: ModelOption) => {
+      if (option.isUnavailable) return;
       void Haptics.selectionAsync();
       setPendingModel((current) =>
         pendingModelAfterPress({
@@ -616,6 +654,14 @@ function ThreadSettingsSessionProvider(
 
   const value = useMemo<ThreadSettingsSessionValue>(
     () => ({
+      hasPresets,
+      showFullCatalog,
+      toggleCatalog: () => {
+        setShowFullCatalog((current) => !current);
+        setProviderFilter(null);
+        setSearchQuery("");
+        setManageHidden(false);
+      },
       environmentId: props.environmentId,
       providerInstanceId: props.providerInstanceId,
       providerGroups,
@@ -649,6 +695,8 @@ function ThreadSettingsSessionProvider(
       toggleFavorite,
     }),
     [
+      hasPresets,
+      showFullCatalog,
       applyOptionChange,
       commitPendingModel,
       compatibleRuntimeMode,
@@ -821,7 +869,7 @@ function useThreadSettingsCatalogItems(
                 query: session.searchQuery,
               }),
           ),
-          session.favoriteKeys,
+          session.hasPresets && !session.showFullCatalog ? new Set() : session.favoriteKeys,
         );
         // Favorites list only selectable models, so it never explains gated ones.
         const updateRequiredNotice =
@@ -1102,6 +1150,22 @@ function ThreadSettingsMainContent(props: {
       maintainVisibleContentPosition={THREAD_SETTINGS_MAINTAIN_VISIBLE_CONTENT_POSITION}
       ListHeaderComponent={
         <>
+          {session.hasPresets ? (
+            <View className="px-4 py-2">
+              <MaterialButton
+                label={session.showFullCatalog ? "Back to presets" : "All models"}
+                tone="text"
+                onPress={session.toggleCatalog}
+              />
+              <Text className="text-sm text-foreground-muted">
+                Current selection: {session.displayedModelSelection?.model} ·{" "}
+                {session.displayedModelSelection?.instanceId}
+                {session.displayedModelSelection?.options
+                  ?.map((option) => ` · ${option.id}: ${String(option.value)}`)
+                  .join("")}
+              </Text>
+            </View>
+          ) : null}
           {Platform.OS === "android" ? (
             <View className="px-4 pb-2 pt-3">
               <View
@@ -1616,6 +1680,7 @@ export function NewTaskThreadSettingsRouteScreen() {
       environmentId={flow.selectedEnvironmentId}
       projectId={flow.selectedProject?.id ?? null}
       {...(flow.selectedModel ? { providerInstanceId: flow.selectedModel.instanceId } : {})}
+      preservePresetIdentity={false}
       providerGroups={flow.providerGroups}
       selectedModel={flow.selectedModel}
       onSelectModel={(option) => flow.setSelectedModelKey(option.key, option.selection.options)}

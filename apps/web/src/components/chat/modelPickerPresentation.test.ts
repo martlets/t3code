@@ -1,9 +1,13 @@
+import { ModelPickerPresentation } from "@t3tools/contracts";
+import * as Schema from "effect/Schema";
+import payload from "../../../../server/src/provider/modelPickerPresentation.json";
+const presentation = Schema.decodeUnknownSync(ModelPickerPresentation)(payload);
 import schedules from "./fixtures/localPickerSchedules.json";
 import { expect, it } from "vite-plus/test";
 import type { ProviderInstanceEntry } from "../../providerInstances";
 import { ProviderInstanceId, type ModelSelection } from "@t3tools/contracts";
 import catalog from "./fixtures/localPickerCatalog.json";
-import { localPickerRows, localSelectionLabel, usesLocalPicker } from "./localPickerPresets";
+import { pickerPresetRows, selectionLabel } from "./modelPickerPresentation";
 
 export function fixtureEntries(): ProviderInstanceEntry[] {
   return catalog.map((p) => ({
@@ -28,7 +32,7 @@ const current = {
 it("validates every preferred combination against the installed catalog and preserves exact dispatch", () => {
   const entries = fixtureEntries();
   const before = JSON.stringify(entries);
-  const rows = localPickerRows(entries, current);
+  const rows = pickerPresetRows(entries, current, true, presentation);
   expect(rows.filter((r) => !r.reason)).toHaveLength(12);
   expect(rows.filter((r) => r.reason)).toHaveLength(2);
   expect(
@@ -48,7 +52,7 @@ it("validates every preferred combination against the installed catalog and pres
     captured.filter((s) => s.instanceId === "codexHigh").every((s) => s.options?.length === 2),
   ).toBe(true);
   expect(
-    localPickerRows(entries, current, false)
+    pickerPresetRows(entries, current, false, presentation)
       .filter((r) => r.group === "Codex")
       .every((r) => r.selection.instanceId === "codex"),
   ).toBe(true);
@@ -58,19 +62,17 @@ it("validates every preferred combination against the installed catalog and pres
 it("retains other accounts and rejects missing catalog support without substitutions", () => {
   const entries = fixtureEntries();
   const other = { ...entries[0]!, instanceId: "codex_work" } as ProviderInstanceEntry;
-  expect(usesLocalPicker([entries[0]!, other])).toBe(false);
-  const rows = localPickerRows([...entries, other], current);
+  expect(pickerPresetRows(entries, current)).toEqual([]);
+  const rows = pickerPresetRows([...entries, other], current, true, presentation);
   expect(
     rows.some(
       (r) => r.selection.instanceId === other.instanceId && r.group.includes(other.instanceId),
     ),
-  ).toBe(true);
+  ).toBe(false);
   const missing = entries.map((e) => ({ ...e, models: [] }));
-  expect(localPickerRows(missing, current).every((r) => r.reason)).toBe(true);
-  expect(localSelectionLabel(current)).toBe("gpt-6.1-sol · high · Standard requested");
-  expect(localSelectionLabel({ ...current, model: "historical-model" })).toContain(
-    "historical-model",
-  );
+  expect(pickerPresetRows(missing, current, true, presentation).every((r) => r.reason)).toBe(true);
+  expect(selectionLabel(current)).toBe("gpt-6.1-sol · high · Standard requested");
+  expect(selectionLabel({ ...current, model: "historical-model" })).toContain("historical-model");
 });
 
 it("leaves all seven captured schedule selections and enablement intact, including options outside the menu", () => {
@@ -80,8 +82,8 @@ it("leaves all seven captured schedule selections and enablement intact, includi
       ...schedule.modelSelection,
       instanceId: ProviderInstanceId.make(schedule.modelSelection.instanceId),
     };
-    localPickerRows(fixtureEntries(), selection);
-    localSelectionLabel(selection);
+    pickerPresetRows(fixtureEntries(), selection, true, presentation);
+    selectionLabel(selection);
   }
   expect(schedules).toEqual(before);
   expect(schedules).toHaveLength(7);
@@ -93,11 +95,11 @@ it("leaves all seven captured schedule selections and enablement intact, includi
 
 it("does not infer thinking or delivered speed from a legacy profile name", () => {
   const legacy = { instanceId: ProviderInstanceId.make("codexHigh"), model: "claude-fable-5-2" };
-  expect(localSelectionLabel(legacy)).toBe(
+  expect(selectionLabel(legacy)).toBe(
     "claude-fable-5-2 · Thinking inherited / unspecified · Speed inherited / unspecified",
   );
   expect(
-    localSelectionLabel({
+    selectionLabel({
       ...legacy,
       options: [
         { id: "reasoningEffort", value: "medium" },
@@ -109,7 +111,7 @@ it("does not infer thinking or delivered speed from a legacy profile name", () =
 
 it("preserves selection and distinguishes explicit requests from absent saved options", () => {
   const selection = { instanceId: ProviderInstanceId.make("codexHigh"), model: "historical-model" };
-  expect(localSelectionLabel(selection)).toBe(
+  expect(selectionLabel(selection)).toBe(
     "historical-model · Thinking inherited / unspecified · Speed inherited / unspecified",
   );
   const explicit = {
@@ -120,9 +122,9 @@ it("preserves selection and distinguishes explicit requests from absent saved op
     ],
   };
   const before = structuredClone(explicit);
-  expect(localSelectionLabel(explicit)).toBe("historical-model · medium · Fast requested");
+  expect(selectionLabel(explicit)).toBe("historical-model · medium · Fast requested");
   expect(explicit).toEqual(before);
-  expect(
-    localSelectionLabel({ ...selection, options: [{ id: "fastMode", value: false }] }),
-  ).toContain("Standard requested");
+  expect(selectionLabel({ ...selection, options: [{ id: "fastMode", value: false }] })).toContain(
+    "Standard requested",
+  );
 });
