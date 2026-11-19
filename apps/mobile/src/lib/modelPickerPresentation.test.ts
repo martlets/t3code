@@ -67,12 +67,14 @@ function compareConsumers(next: ModelPickerPresentation, preserve = false) {
     preserve,
   );
   expect(
-    mobile.map((row) => ({
-      label: row.label,
-      group: row.providerLabel,
-      selection: row.selection,
-      disabled: row.isUnavailable,
-    })),
+    groupByProvider(mobile)
+      .flatMap((group) => group.models)
+      .map((row) => ({
+        label: row.label,
+        group: row.providerLabel,
+        selection: row.selection,
+        disabled: row.isUnavailable,
+      })),
   ).toEqual(
     web.map((row) => ({
       label: row.label,
@@ -85,6 +87,21 @@ function compareConsumers(next: ModelPickerPresentation, preserve = false) {
 }
 
 describe("central picker presentation", () => {
+  it("renders interleaved groups contiguously by stable identity even when labels match", () => {
+    const first = presentation.presets[0]!;
+    const second = presentation.presets[8]!;
+    const third = presentation.presets[1]!;
+    const next = {
+      ...presentation,
+      groups: presentation.groups.map((group) => ({ ...group, label: "Shared label" })),
+      presets: [first, second, third],
+    };
+    const { web, mobile } = compareConsumers(next);
+    expect(web.map((row) => row.id)).toEqual([first.id, third.id, second.id]);
+    expect(web.map((row) => row.groupId)).toEqual([first.groupId, first.groupId, second.groupId]);
+    expect(groupByProvider(mobile)).toHaveLength(2);
+  });
+
   it("publishes the 14 ordered owner presets without mutating the runtime catalog", () => {
     const before = structuredClone(providers);
     expect(modelPickerPresentation(providers)).toEqual(presentation);

@@ -5403,11 +5403,7 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
         preservePresetIdentity={routeKind === "server"}
         onPresetSelect={(selection) => {
           setMultipleModelSelections(null);
-          onProviderModelSelect(
-            selection.instanceId,
-            selection.model,
-            selection.options ? { selection } : undefined,
-          );
+          onProviderModelSelect(selection.instanceId, selection.model, { selection });
         }}
         selectionLabel={selectionLabel(selectedModelSelection)}
         environmentId={environmentId}

@@ -32,7 +32,7 @@ export function resolveModelPickerPresets(
   preserveIdentity = true,
 ) {
   const seen = new Set<string>();
-  return (presentation?.presets ?? []).flatMap((preset) => {
+  const rows = (presentation?.presets ?? []).flatMap((preset) => {
     if (seen.has(preset.id)) return [];
     seen.add(preset.id);
     const group = presentation?.groups.find((candidate) => candidate.id === preset.groupId);
@@ -84,4 +84,12 @@ export function resolveModelPickerPresets(
       },
     ];
   });
+  // Keep groups contiguous in first-occurrence order on every client.
+  const groups = new Map<string, typeof rows>();
+  for (const row of rows) {
+    const group = groups.get(row.groupId);
+    if (group) group.push(row);
+    else groups.set(row.groupId, [row]);
+  }
+  return [...groups.values()].flat();
 }
