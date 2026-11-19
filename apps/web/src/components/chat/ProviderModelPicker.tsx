@@ -70,12 +70,9 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
 }) {
   const composerFloatingLayerProps = useComposerMenuProps();
   const [uncontrolledIsMenuOpen, setUncontrolledIsMenuOpen] = useState(false);
-  const [showFullCatalog, setShowFullCatalog] = useState(false);
+  const [showFullCatalog, setShowFullCatalog] = useState(props.selectedModels !== undefined);
   const localPicker =
-    props.selectedModels === undefined &&
-    !!props.currentSelection &&
-    !!props.onPresetSelect &&
-    usesLocalPicker(props.instanceEntries);
+    !!props.currentSelection && !!props.onPresetSelect && usesLocalPicker(props.instanceEntries);
   const isMenuOpen = props.open ?? uncontrolledIsMenuOpen;
   const size = props.size ?? "sm";
 
